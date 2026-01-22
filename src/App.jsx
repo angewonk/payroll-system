@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import './App.css';
 import Payslip from './Payslip';
+import CustomSelect from './CustomSelect';
 import { 
   computeWithholdingTax, 
   calculateDailyRate, 
+  calculateOTPay,
   formatCurrency,
   formatNumber
 } from './utils';
@@ -141,16 +143,14 @@ function App() {
       const pagibig = safeNum(emp.pagibig);
 
       const dailyRate = calculateDailyRate(basicForDecl);
-      const hourlyRate = dailyRate / 8;
-      const otPay = hrsOT * hourlyRate;
+      const otPay = calculateOTPay(basicForDecl, hrsOT);
       let holidayPay = 0;
       if (hrsHoliday > 0) {
+        // Use daily-rate based computation: holidayPay = dailyRate * multiplier * (hours / 8)
         if (emp.holidayType === 'Regular') {
-          // Regular holiday pays 125% of hourly rate per hour
-          holidayPay = (hourlyRate * 1.25) * hrsHoliday;
+          holidayPay = dailyRate * 1.0 * (hrsHoliday / 8);
         } else {
-          // Special holiday remains 30% as before
-          holidayPay = (hourlyRate * 0.3) * hrsHoliday;
+          holidayPay = dailyRate * 0.3 * (hrsHoliday / 8);
         }
       }
 
@@ -197,17 +197,15 @@ function App() {
 
     // 1. Calculations (use `basicForDecl` as the computation base)
     const dailyRate = calculateDailyRate(basicForDecl);
-    const hourlyRate = dailyRate / 8;
-    const otPay = hrsOT * hourlyRate; // flat OT rate (no percent multiplier)
+    const otPay = calculateOTPay(basicForDecl, hrsOT);
     
     let holidayPay = 0;
     if (hrsHoliday > 0) {
+      // Use daily-rate based computation: holidayPay = dailyRate * multiplier * (hours / 8)
       if (emp.holidayType === 'Regular') {
-        // Regular holiday pays 125% of hourly rate per hour
-        holidayPay = (hourlyRate * 1.25) * hrsHoliday;
+        holidayPay = dailyRate * 1.0 * (hrsHoliday / 8);
       } else {
-        // Special holiday remains 30% as before
-        holidayPay = (hourlyRate * 0.3) * hrsHoliday;
+        holidayPay = dailyRate * 0.3 * (hrsHoliday / 8);
       }
     }
 
@@ -269,37 +267,53 @@ function App() {
       return (
         <tr key={emp.id || `r-${index}`} className={highlightedRows.includes(emp.id) ? 'row-highlight' : ''}>
         <td style={{textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center'}}>
-            <button className="btn-print" onClick={() => handlePrint(emp)} title="Print" style={{padding:'6px 10px', background: 'transparent', color: '#374151', border: '1px solid transparent'}}>
-              <span role="img" aria-label="print">🖨️</span>
+            <button className="btn-icon btn-print" onClick={() => handlePrint(emp)} title="Print">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M6 9V3h12v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <rect x="6" y="13" width="12" height="8" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+                <path d="M6 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </button>
-            <button className="btn-highlight" onClick={() => handleToggleHighlight(emp.id)} title="Toggle highlight row">
-              <span role="img" aria-label="highlight">🔆</span>
+            <button className="btn-icon btn-highlight" onClick={() => handleToggleHighlight(emp.id)} title="Toggle highlight row">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M12 2v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 18v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M4.2 4.2l2.8 2.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M17 10a5 5 0 1 1-10 0 5 5 0 0 1 10 0z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </button>
         </td>
-        <td><input type="text" value={emp.id} onChange={(e) => handleInputChange(index, 'id', e.target.value)} style={{textAlign: 'center', fontWeight: 'bold'}} /></td>
+        <td className="col-id"><input type="text" value={emp.id} onChange={(e) => handleInputChange(index, 'id', e.target.value)} style={{textAlign: 'center', fontWeight: 'bold'}} /></td>
         
         <td className="text-left"><input type="text" value={emp.name} onChange={(e) => handleInputChange(index, 'name', e.target.value)} /></td>
-        <td><input type="number" value={emp.basicSalary} onChange={(e) => handleInputChange(index, 'basicSalary', e.target.value)} style={{textAlign:'right'}} /></td>
-        <td><input type="number" value={emp.basicForDecl} onChange={(e) => handleInputChange(index, 'basicForDecl', e.target.value)} style={{textAlign:'right'}} /></td>
+        <td className="col-basic-salary"><input type="number" value={emp.basicSalary} onChange={(e) => handleInputChange(index, 'basicSalary', e.target.value)} style={{textAlign:'right'}} /></td>
+        <td className="col-basic-decl"><input type="number" value={emp.basicForDecl} onChange={(e) => handleInputChange(index, 'basicForDecl', e.target.value)} style={{textAlign:'right'}} /></td>
         
         {/* Variable Inputs */}
         <td><input type="number" value={emp.hrsOT} onChange={(e) => handleInputChange(index, 'hrsOT', e.target.value)} placeholder="0" /></td>
         <td><span className="calculated-cell">{formatCurrency(calculated.otPay)}</span></td>
         <td><input type="number" value={emp.hrsHoliday} onChange={(e) => handleInputChange(index, 'hrsHoliday', e.target.value)} placeholder="0" /></td>
-        <td style={{textAlign: 'center', color: '#374151', fontWeight: 600}}>Regular (125%)</td>
+        <td>
+          <CustomSelect
+            className="custom-holiday-select"
+            value={emp.holidayType}
+            onChange={(v) => handleInputChange(index, 'holidayType', v)}
+            options={[{ value: 'Regular', label: 'Regular (100%)' }, { value: 'Special', label: 'Special (30%)' }]}
+          />
+        </td>
         <td><span className="calculated-cell">{formatCurrency(calculated.holidayPay)}</span></td>
 
         {/* Adjustments */}
-        <td><input type="number" value={emp.deMinimis} onChange={(e) => handleInputChange(index, 'deMinimis', e.target.value)} /></td>
+        <td className="col-deminimis"><input type="number" value={emp.deMinimis} onChange={(e) => handleInputChange(index, 'deMinimis', e.target.value)} /></td>
         <td><input type="number" value={emp.thirteenth ?? ''} onChange={(e) => handleInputChange(index, 'thirteenth', e.target.value)} style={{textAlign:'right', width: '90px'}} /></td>
         <td><input type="number" value={emp.nonTaxableOther} onChange={(e) => handleInputChange(index, 'nonTaxableOther', e.target.value)} /></td>
-        <td><input type="number" value={emp.hmo2 || 0} onChange={(e) => handleInputChange(index, 'hmo2', e.target.value)} style={{textAlign:'right'}} /></td>
+        <td className="col-hmo2"><input type="number" value={emp.hmo2 || 0} onChange={(e) => handleInputChange(index, 'hmo2', e.target.value)} style={{textAlign:'right'}} /></td>
         <td><input type="number" value={emp.deduction} onChange={(e) => handleInputChange(index, 'deduction', e.target.value)} /></td>
         
         <td><span className="calculated-cell" style={{backgroundColor:'#ecfdf5', color:'#047857'}}>{formatCurrency(calculated.grossPay)}</span></td>
         <td><span className="calculated-cell">{formatCurrency((parseFloat(emp.sss)||0) + (parseFloat(emp.sssMpf)||0))}</span></td>
         <td><input type="number" value={emp.philhealth} onChange={(e) => handleInputChange(index, 'philhealth', e.target.value)} /></td>
-        <td><input type="number" value={emp.pagibig} onChange={(e) => handleInputChange(index, 'pagibig', e.target.value)} /></td>
+        <td className="col-pagibig"><input type="number" value={emp.pagibig} onChange={(e) => handleInputChange(index, 'pagibig', e.target.value)} /></td>
         <td><span className="calculated-cell">{formatCurrency(calculated.totalContributions)}</span></td>
 
         {/* Tax */}
@@ -349,8 +363,8 @@ function App() {
                 />
             </div>
                     <div>
-                      <button onClick={handleAddRow} style={{padding:'8px 12px', borderRadius:'6px', border:'1px solid #cbd5e1', background:'#06b6d4', color:'#fff', fontWeight:700}}>Add Row</button>
-                    </div>
+                              <button className="btn-add" onClick={handleAddRow}>Add Row</button>
+                            </div>
             <div style={{flex:1}}>
                  <p style={{margin:0, fontSize:'0.9rem', color:'#475569'}}>
                     <strong>Instructions:</strong> Review fixed contributions. Enter <strong>OT Hours</strong> and <strong>Holiday Hours</strong> for this period.
@@ -360,13 +374,42 @@ function App() {
 
         <div className="payroll-table-wrapper">
             <table>
+            <colgroup>
+              <col />
+              <col />
+              <col />
+              <col className="col-basic-salary" />
+              <col className="col-basic-decl" />
+              <col />
+              <col />
+              <col />
+              <col />
+              <col />
+              <col className="col-deminimis" />
+              <col />
+              <col />
+              <col className="col-hmo2" />
+              <col />
+              <col />
+              <col />
+              <col />
+              <col className="col-pagibig" />
+              <col />
+              <col />
+              <col />
+              <col />
+              <col />
+              <col />
+              <col />
+              <col />
+            </colgroup>
             <thead>
                 <tr>
                 <th rowSpan="2" style={{zIndex: 20}}>Action</th>
-                <th rowSpan="2">ID</th>
+                <th rowSpan="2" className="col-id">ID</th>
                 <th rowSpan="2" style={{minWidth:'180px'}}>Employee Name</th>
-                <th rowSpan="2">Basic Salary</th>
-                <th rowSpan="2">Basic Salary for Declaration</th>
+                <th rowSpan="2" className="col-basic-salary">Basic Salary</th>
+                <th rowSpan="2" className="col-basic-decl">Basic Salary for Declaration</th>
                 <th colSpan="2" className="section-header">Overtime</th>
                 <th colSpan="3" className="section-header">Holiday</th>
                 <th colSpan="5" className="section-header">Adjustments</th>
@@ -384,14 +427,14 @@ function App() {
                 <th style={{top: '45px'}}>Hours</th>
                 <th style={{top: '45px', width: '160px'}}>Type</th>
                 <th style={{top: '45px'}}>Amount</th>
-                <th style={{top: '45px'}}>De Minimis</th>
+                <th style={{top: '45px'}} className="col-deminimis">De Minimis</th>
                 <th style={{top: '45px', width: '80px'}}>13th Month/Benefits</th>
                 <th style={{top: '45px'}}>INTERNET</th>
                 <th style={{top: '45px'}}>2nd HMO</th>
                 <th style={{top: '45px'}}>Deduction</th>
                 <th style={{top: '45px'}}>SSS / MPF</th>
                 <th style={{top: '45px'}}>PhilHealth</th>
-                <th style={{top: '45px'}}>Pag-IBIG</th>
+                <th className="col-pagibig" style={{top: '45px', minWidth: '120px'}}>Pag-IBIG</th>
                 <th style={{top: '45px'}}>Total</th>
                 <th style={{top: '45px'}}>SSS Salary</th>
                 <th style={{top: '45px'}}>SSS Housing</th>
@@ -400,48 +443,48 @@ function App() {
                 </tr>
             </thead>
             <tbody>
-                {processedEmployees.map((emp, index) => renderRow(emp, index))}
-                
-                {/* Totals Row (explicit cells to keep alignment with data columns) */}
-                <tr className="totals-row">
-                <td colSpan="3" className="text-center">TOTALS</td> {/* action, id, name */}
-                <td className="text-right">{formatNumber(totals.basicSalary)}</td> {/* basicSalary */}
-                <td className="text-right">{formatNumber(totals.basicForDecl)}</td> {/* basicForDecl */}
-
-                {/* Overtime & Holiday columns (6-11) */}
-                <td></td> {/* OT hours */}
-                <td></td> {/* OT amount */}
-                <td></td> {/* Holiday hours */}
-                <td></td> {/* Holiday type */}
-                <td></td> {/* Holiday amount */}
-
-                {/* Adjustments (11-15) */}
-                <td></td> {/* De Minimis */}
-                <td className="text-right">{formatNumber(totals.thirteenth || 0)}</td> {/* 13th month */}
-                <td></td> {/* INTERNET / nonTaxableOther */}
-                <td></td> {/* 2nd HMO */}
-                <td></td> {/* Deduction */}
-
-                <td className="text-right"><span className="calculated-cell">{formatCurrency(totals.grossPay)}</span></td> {/* Gross Pay (16) */}
-
-                {/* Contributions (17-21) */}
-                <td></td> {/* SSS / MPF */}
-                <td></td> {/* PhilHealth */}
-                <td></td> {/* Pag-IBIG */}
-                <td></td> {/* Total contributions */}
-
-                <td></td> {/* Taxable Income */}
-                <td className="text-right"><span className="calculated-cell" style={{color:'#f87171'}}>{formatCurrency(totals.wTax)}</span></td> {/* Withholding Tax (22) */}
-
-                {/* Loans (23-26) */}
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-
-                <td className="text-right"><span className="calculated-cell" style={{color:'#60a5fa', fontSize:'1.2em'}}>{formatCurrency(totals.netPay)}</span></td> {/* Net Pay (27) */}
-                </tr>
+              {processedEmployees.map((emp, index) => renderRow(emp, index))}
             </tbody>
+            <tfoot>
+              <tr className="totals-row">
+              <td colSpan="3" className="text-center">TOTALS</td> {/* action, id, name */}
+              <td className="text-right col-basic-salary">{formatCurrency(totals.basicSalary || 0)}</td> {/* basicSalary */}
+              <td className="text-right col-basic-decl">{formatCurrency(totals.basicForDecl || 0)}</td> {/* basicForDecl */}
+
+              {/* Overtime & Holiday columns (6-11) */}
+              <td></td> {/* OT hours */}
+              <td></td> {/* OT amount */}
+              <td></td> {/* Holiday hours */}
+              <td></td> {/* Holiday type */}
+              <td></td> {/* Holiday amount */}
+
+              {/* Adjustments (11-15) */}
+              <td className="col-deminimis"></td> {/* De Minimis */}
+              <td className="text-right col-thirteenth">{formatCurrency(totals.thirteenth || 0)}</td> {/* 13th month */}
+              <td></td> {/* INTERNET / nonTaxableOther */}
+              <td className="col-hmo2"></td> {/* 2nd HMO */}
+              <td></td> {/* Deduction */}
+
+              <td className="text-right"><span className="calculated-cell">{formatCurrency(totals.grossPay)}</span></td> {/* Gross Pay (16) */}
+
+              {/* Contributions (17-21) */}
+              <td></td> {/* SSS / MPF */}
+              <td></td> {/* PhilHealth */}
+              <td></td> {/* Pag-IBIG */}
+              <td></td> {/* Total contributions */}
+
+              <td></td> {/* Taxable Income */}
+              <td className="text-right"><span className="calculated-cell" style={{color:'#f87171'}}>{formatCurrency(totals.wTax)}</span></td> {/* Withholding Tax (22) */}
+
+              {/* Loans (23-26) */}
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+
+              <td className="text-right"><span className="calculated-cell" style={{color:'#60a5fa', fontSize:'1.2em'}}>{formatCurrency(totals.netPay)}</span></td> {/* Net Pay (27) */}
+              </tr>
+            </tfoot>
             </table>
         </div>
         </div>

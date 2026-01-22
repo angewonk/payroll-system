@@ -26,8 +26,9 @@ export const calculateOTPay = (basicSalary, hours) => {
   if (!hours || hours <= 0) return 0;
   const dailyRate = calculateDailyRate(basicSalary);
   const hourlyRate = calculateHourlyRate(dailyRate);
-  // Use flat OT rate (no percentage multiplier): OT = hourlyRate * hours
-  return hourlyRate * hours;
+  // Overtime pays 125% of the hourly rate (hourlyRate * 1.25) per hour
+  // OT = hourlyRate * 1.25 * hours
+  return hourlyRate * 1.25 * hours;
 };
 
 // Revised Withholding Tax Table (Jan 1, 2023 onwards)

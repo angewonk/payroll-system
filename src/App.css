@@ -1,27 +1,63 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght,GRAD@0,17..18,400..700,36;1,17..18,400..700,36&display=swap');
 
 :root {
-  --primary: #4f46e5; /* Indigo 600 */
-  --primary-hover: #4338ca;
-  --secondary: #64748b;
-  --bg-body: #f1f5f9; /* Slate 100 */
+  /* Palette provided by user */
+  --palette-1: #C0DFD9; /* mint */
+  --palette-2: #E9ECE6; /* off-white / very light */
+  --palette-3: #BCCBC9; /* muted */
+  --palette-4: #AAB8B6; /* soft gray-green */
+  --palette-5: #545B5A; /* dark accent */
+
+  /* Semantic tokens mapped to palette */
+  --primary: var(--palette-5);
+  --primary-hover: #434A49;
+  --secondary: var(--palette-4);
+  --bg-body: var(--palette-2);
   --bg-card: #ffffff;
-  --text-main: #1e293b;
-  --text-light: #64748b;
-  --border: #e2e8f0;
+  --text-main: #152523; /* very dark greenish for contrast */
+  --text-light: var(--palette-4);
+  --border: #dfe8e6;
   --danger: #ef4444;
   --success: #10b981;
-  --accent-row: #f8fafc;
-  --input-focus: #e0e7ff;
+  --accent-row: var(--palette-2);
+  --input-focus: rgba(192,223,217,0.45);
+  /* Scrollbar tokens */
+  --scroll-thumb: #cbd5e1;
+  --scroll-thumb-hover: #94a3b8;
+  --scroll-track: #f1f1f1;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Google Sans', Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   margin: 0;
   padding: 20px;
   background-color: var(--bg-body);
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Google Sans utility classes (variable font usage) */
+.google-sans-400 {
+  font-family: "Google Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "GRAD" 1;
+}
+.google-sans-500 {
+  font-family: "Google Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-variation-settings: "GRAD" 1;
+}
+.google-sans-700 {
+  font-family: "Google Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-variation-settings: "GRAD" 1;
 }
 
 /* --- MAIN CONTAINER CARD --- */
@@ -39,8 +75,33 @@ h1 {
   color: var(--primary);
   font-weight: 700;
   font-size: 1.8rem;
+  /* Prefer Google Sans for headings when available */
+  font-family: "Google Sans", Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   margin-bottom: 8px;
   letter-spacing: -0.5px;
+}
+
+/* Google Sans utility classes (variable font usage) */
+.google-sans-ui-400 {
+  font-family: "Google Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "GRAD" 36;
+}
+.google-sans-ui-500 {
+  font-family: "Google Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-variation-settings: "GRAD" 36;
+}
+.google-sans-ui-700 {
+  font-family: "Google Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-variation-settings: "GRAD" 36;
 }
 
 .controls {
@@ -49,47 +110,76 @@ h1 {
   font-size: 0.95rem;
   border-left: 4px solid var(--primary);
   padding-left: 15px;
-  background: #eff6ff;
+  background: var(--palette-1);
   padding: 10px 15px;
   border-radius: 0 8px 8px 0;
 }
 
 /* --- MODERN TABLE STYLES --- */
 .payroll-table-wrapper {
+  /* allow both horizontal and vertical scrolling when needed */
   overflow-x: auto;
+  overflow-y: auto;
   max-height: 80vh;
   border-radius: 12px;
   border: 1px solid var(--border);
   box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+  /* ensure horizontal scrollbar appears at bottom and is always available when content overflows */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track); /* Firefox */
 }
 
 /* Custom Scrollbar */
+.payroll-table-wrapper {
+  /* Firefox: thin + color tokens */
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+}
+
+/* WebKit-based browsers */
 .payroll-table-wrapper::-webkit-scrollbar {
-  height: 10px;
-  width: 10px;
+  height: 12px; /* horizontal scrollbar thickness */
+  width: 12px;  /* vertical scrollbar thickness */
 }
-.payroll-table-wrapper::-webkit-scrollbar-track { background: #f1f1f1; }
-.payroll-table-wrapper::-webkit-scrollbar-thumb { 
-  background: #cbd5e1; 
-  border-radius: 5px; 
+.payroll-table-wrapper::-webkit-scrollbar-track {
+  background: linear-gradient(90deg, var(--scroll-track), #f7faf7);
+  border-radius: 12px;
 }
-.payroll-table-wrapper::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.payroll-table-wrapper::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--scroll-thumb) 0%, var(--scroll-thumb-hover) 100%);
+  border-radius: 12px;
+  border: 3px solid transparent; /* padding effect */
+  background-clip: padding-box;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.03);
+}
+.payroll-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--scroll-thumb-hover) 0%, #93a0b5 100%);
+  transform: scale(1.01);
+}
+.payroll-table-wrapper::-webkit-scrollbar-thumb:active {
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.08);
+}
+
+/* Ensure scrollbar corner matches the track color */
+.payroll-table-wrapper::-webkit-scrollbar-corner { background: var(--scroll-track); }
 
 table {
-  border-collapse: separate;
+  /* Use collapsed borders to keep header and body column edges aligned */
+  border-collapse: collapse;
   border-spacing: 0;
   width: 100%;
   font-size: 13px;
-  min-width: 2200px; /* Ensures layout doesn't break */
+  min-width: 3000px; /* Ensure enough horizontal space so numbers don't wrap */
+  box-sizing: border-box;
 }
 
 /* Headers */
 thead {
-  background-color: #f8fafc;
+  background-color: var(--palette-2);
 }
 
 th {
-  background-color: #f8fafc; /* Slate 50 */
+  background-color: var(--palette-2);
   color: var(--text-main);
   font-weight: 600;
   text-transform: uppercase;
@@ -97,11 +187,24 @@ th {
   letter-spacing: 0.05em;
   padding: 12px 10px;
   border-bottom: 2px solid var(--border);
-  border-right: 1px solid var(--border);
+  /* remove individual right borders so collapsed table keeps single shared borders */
   position: sticky;
   top: 0;
   z-index: 10;
   backdrop-filter: blur(10px); /* Glass effect if BG was semi-transparent */
+  box-sizing: border-box;
+}
+
+/* Fixed header row heights for consistent alignment */
+thead tr:first-child th {
+  height: 56px;
+  min-height: 56px;
+  max-height: 56px;
+}
+thead tr:nth-child(2) th {
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
 }
 
 th.section-header {
@@ -114,9 +217,61 @@ th.section-header {
 td {
   padding: 8px 12px;
   border-bottom: 1px solid var(--border);
-  border-right: 1px solid #f1f5f9;
   vertical-align: middle;
   transition: background-color 0.2s;
+  box-sizing: border-box;
+}
+
+/* Fixed body row height and cell overflow behavior */
+tbody tr {
+  /* Keep taller rows but prefer horizontal space for numbers */
+  height: 84px;
+  min-height: 84px;
+  max-height: 84px;
+}
+tbody td {
+  height: 84px;
+  min-height: 84px;
+  max-height: 84px;
+  overflow: hidden; /* keep layout tidy */
+  text-overflow: ellipsis;
+  white-space: nowrap; /* keep numbers on one line to the right */
+}
+
+/* Action column override: allow buttons to layout horizontally and not be clipped */
+tbody td:first-child {
+  white-space: normal !important;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 8px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Normalize input/select heights for vertical centering */
+td input, td select {
+  height: 36px;
+  line-height: 36px;
+  padding: 6px 8px;
+  box-sizing: border-box;
+}
+
+/* Remove number input spinner controls (scoped to payroll table) */
+.payroll-table-wrapper input[type="number"]::-webkit-outer-spin-button,
+.payroll-table-wrapper input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.payroll-table-wrapper input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+  appearance: textfield;
+}
+
+.calculated-cell {
+  display: inline-block;
+  height: 36px;
+  line-height: 36px;
+  padding: 6px 12px;
 }
 
 tr {
@@ -125,11 +280,11 @@ tr {
 }
 
 tr:nth-child(even) {
-  background-color: #fafafa; /* Very subtle stripe */
+  background-color: var(--palette-2); /* subtle stripe using palette */
 }
 
 tr:not(.totals-row):hover {
-  background-color: #f0f9ff !important; /* Light blue highlight on hover */
+  background-color: var(--palette-1) !important; /* highlight using mint */
   transform: scale(1); /* Hack to trigger GPU rendering for smoothness */
   z-index: 5;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
@@ -172,8 +327,8 @@ td input:focus, td select:focus {
 
 /* Specific Cell Colors */
 .calculated-cell {
-  background-color: #f0fdf4; /* Light green bg */
-  color: #15803d; /* Green text */
+  background-color: var(--palette-1); /* Light mint bg */
+  color: var(--palette-5); /* dark accent text */
   font-weight: 600;
   border-radius: 6px;
   text-align: right;
@@ -193,24 +348,25 @@ td input:focus, td select:focus {
 
 /* --- BUTTONS --- */
 .btn-print {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  /* keep for backwards compatibility but reduce visual weight for icon-only button */
+  background: linear-gradient(135deg, var(--palette-5) 0%, var(--palette-4) 100%);
   color: white;
   border: none;
-  padding: 6px 16px;
-  border-radius: 20px;
+  padding: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 3px 6px rgba(16,24,40,0.06);
 }
 
 .btn-print:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 10px rgba(79, 70, 229, 0.3);
-  filter: brightness(1.1);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 14px rgba(16,24,40,0.08);
 }
 
 .btn-print:active {
@@ -219,20 +375,41 @@ td input:focus, td select:focus {
 
 /* Highlight toggle button */
 .btn-highlight {
-  background: #ffffff;
-  border: 1px solid #e6edf3;
-  color: #374151;
-  padding: 6px 8px;
+  background: transparent;
+  border: 1px solid rgba(84,91,90,0.08);
+  color: var(--palette-5);
+  width: 36px;
+  height: 36px;
+  padding: 6px;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   box-shadow: 0 1px 2px rgba(16,24,40,0.04);
 }
-.btn-highlight:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(16,24,40,0.06); }
+.btn-highlight:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 12px rgba(16,24,40,0.06); }
+
+/* Generic icon button base */
+.btn-icon svg { display: block; }
+
+/* Add Row button (primary accent) */
+.btn-add {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(180deg, var(--palette-5) 0%, #3f4948 100%);
+  color: var(--palette-2);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(84,91,90,0.08);
+}
+.btn-add:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(84,91,90,0.12); }
+.btn-add:active { transform: translateY(0); }
 
 /* Row highlight style */
 tr.row-highlight {
-  background-color: rgba(255, 247, 205, 0.9) !important; /* pale yellow */
+  background-color: rgba(192, 223, 217, 0.9) !important; /* mint-tinted highlight */
 }
 tr.row-highlight td {
   background-color: transparent; /* keep cell padding consistent */
@@ -240,7 +417,7 @@ tr.row-highlight td {
 
 /* --- TOTALS ROW --- */
 .totals-row {
-  background-color: #1e293b !important; /* Dark Slate */
+  background-color: var(--palette-5) !important; /* dark accent */
   color: white;
   font-weight: 700;
 }
@@ -294,6 +471,8 @@ tr.row-highlight td {
 @media print {
   .payslip-logo { height: 120px; }
 }
+/* Ensure second header row sits below the first when sticky (overrides inline top values) */
+thead tr:nth-child(2) th { top: 48px !important; }
 .employee-info { margin-bottom: 10px; }
 .info-row { display: flex; margin-bottom: 2px; font-size: 0.9rem; }
 .info-row .label { width: 100px; }
@@ -315,6 +494,234 @@ tr.row-highlight td {
 .employee-sign-line { border-top: 1px solid #000; margin-top: 40px; text-align: center; width: 100%; }
 
 /* --- PRINT MEDIA QUERY --- */
+/* CustomSelect base container */
+.custom-holiday-select {
+  min-width: 160px;
+}
+
+/* CustomSelect styles - clean implementation */
+.custom-select { 
+  display: inline-block; 
+  position: relative; 
+  min-width: 160px; 
+}
+
+.custom-select__control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(84,91,90,0.08);
+  background: var(--bg-card);
+  background-image: none !important;
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 13px;
+  transition: box-shadow 0.12s ease, border-color 0.12s ease;
+  box-shadow: 0 6px 18px rgba(84,91,90,0.04);
+}
+
+.custom-select__control:hover {
+  box-shadow: 0 10px 30px rgba(84,91,90,0.06);
+}
+
+.custom-select__control:focus { 
+  outline: none; 
+  border-color: var(--primary-hover);
+  box-shadow: 0 10px 30px rgba(79,70,229,0.08);
+}
+
+.custom-select__value { 
+  flex: 1;
+  text-align: left; 
+}
+
+.custom-select__caret { 
+  margin-left: 8px; 
+  color: var(--palette-5);
+  user-select: none;
+}
+
+/* Floating menu positioning and styling */
+.custom-select__menu {
+  position: absolute;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(16,24,40,0.15);
+  z-index: 10050;
+  max-height: 240px;
+  overflow-y: auto;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* Seamless connection: menu below */
+.custom-select.is-open:not(.is-flipped) .custom-select__control {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+}
+.custom-select__menu:not(.is-flipped) {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Seamless connection: flipped menu above */
+.custom-select.is-open.is-flipped .custom-select__control {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top-color: transparent;
+  box-shadow: none;
+}
+.custom-select__menu.is-flipped {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: 0 -4px 15px rgba(16,24,40,0.1);
+}
+
+/* Option visuals */
+.custom-select__option {
+  padding: 10px 14px;
+  cursor: pointer;
+  color: var(--text-main);
+  font-size: 13px;
+  transition: background-color 0.1s;
+}
+.custom-select__option.is-highlight {
+  background-color: var(--palette-1);
+  color: var(--palette-5);
+}
+.custom-select__option.is-selected {
+  font-weight: 700;
+  background-color: rgba(192, 223, 217, 0.3);
+}
+
+/* Specific column sizing for Pag-IBIG to make numbers readable */
+.col-pagibig {
+  min-width: 140px; /* wider column for Pag-IBIG */
+}
+.col-pagibig input {
+  text-align: right;
+  width: 110px; /* keep input narrower than header but still roomy */
+}
+
+/* Specific column sizing for Basic Salary and De Minimis */
+.col-basic-salary {
+  min-width: 180px; /* make Basic Salary column wider */
+}
+.col-basic-salary input { text-align: right; width: 140px; }
+
+.col-basic-decl {
+  min-width: 200px; /* widen Basic Salary for Declaration */
+}
+.col-basic-decl input { text-align: right; width: 160px; }
+
+.col-deminimis {
+  min-width: 140px; /* widen De Minimis column */
+}
+.col-deminimis input { text-align: right; width: 120px; }
+
+/* Column element widths for reliable table alignment */
+col.col-basic-salary { width: 180px; }
+col.col-basic-decl { width: 200px; }
+col.col-deminimis { width: 140px; }
+col.col-pagibig { width: 140px; }
+
+/* ID column sizing */
+.col-id { min-width: 160px; }
+.col-id input { text-align: center; width: 120px; }
+col.col-id { width: 160px; }
+
+/* 2nd HMO column sizing */
+.col-hmo2 { min-width: 120px; }
+.col-hmo2 input { text-align: right; width: 100px; }
+col.col-hmo2 { width: 120px; }
+
+/* Right-align totals for specific columns in the footer */
+table tfoot td.col-basic-salary,
+table tfoot td.col-basic-decl {
+  text-align: right;
+  padding-right: 18px; /* matches cell spacing and places totals visually near the column edge */
+}
+
+/* Right-align totals for 13th month / benefits column */
+table tfoot td.col-thirteenth {
+  text-align: right;
+  padding-right: 18px;
+}
+
+/* --- CustomSelect Flip + Visual Fixes (appended) --- */
+/* Kill legacy native arrow if any remains */
+.custom-select.holiday-select .custom-select__control {
+  background-image: none !important;
+  padding-right: 12px;
+}
+
+/* Floating menu base styles */
+.custom-select__menu {
+  position: absolute;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(16,24,40,0.15);
+  z-index: 10050;
+  max-height: 240px;
+  overflow-y: auto;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* Seamless connection: menu below */
+.custom-select.is-open:not(.is-flipped) .custom-select__control {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+}
+.custom-select__menu:not(.is-flipped) {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Seamless connection: flipped menu above */
+.custom-select.is-open.is-flipped .custom-select__control {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top-color: transparent;
+  box-shadow: none;
+}
+.custom-select__menu.is-flipped {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: 0 -4px 15px rgba(16,24,40,0.1);
+}
+
+/* Option visuals */
+.custom-select__option {
+  padding: 10px 14px;
+  cursor: pointer;
+  color: var(--text-main);
+  font-size: 13px;
+  transition: background-color 0.1s;
+}
+.custom-select__option.is-highlight {
+  background-color: var(--palette-1);
+  color: var(--palette-5);
+}
+.custom-select__option.is-selected {
+  font-weight: 700;
+  background-color: rgba(192, 223, 217, 0.3);
+}
+
+/* Ensure no leftover small arrows from legacy rules */
+.holiday-select, .holiday-select * { background-image: none !important; }
+
 @media print {
   .container { display: none !important; }
   body { background-color: white; padding: 0; margin: 0; }
