@@ -134,14 +134,14 @@ function App() {
     // 1. Calculations
     const dailyRate = calculateDailyRate(basicSalary);
     const hourlyRate = dailyRate / 8;
-    const otPay = hrsOT * (hourlyRate * 1.25);
+    const otPay = hrsOT * hourlyRate; // flat OT rate (no percent multiplier)
     
     let holidayPay = 0;
     if (hrsHoliday > 0) {
       if (emp.holidayType === 'Regular') {
-          holidayPay = (hourlyRate * 1) * hrsHoliday;
+        holidayPay = (hourlyRate * 1) * hrsHoliday;
       } else {
-          holidayPay = (hourlyRate * 0.3) * hrsHoliday;
+        holidayPay = (hourlyRate * 0.3) * hrsHoliday;
       }
     }
 

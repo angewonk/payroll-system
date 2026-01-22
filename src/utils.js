@@ -13,16 +13,12 @@ export const calculateHolidayPay = (basicSalary, type, hours) => {
   if (!hours || hours <= 0) return 0;
   
   const dailyRate = calculateDailyRate(basicSalary);
-  const hourlyRate = calculateHourlyRate(dailyRate);
-
-  if (type === 'Regular') {
-    // Regular Holiday: 100% additional (Double Pay effectively)
-    // The formula calculates the ADDED amount on top of the fixed basic
-    return (hourlyRate * 1) * hours; 
-  } else if (type === 'Special') {
-    // Special Holiday: 30% premium
-    return (hourlyRate * 0.30) * hours;
-  }
+  // Use daily-rate based computation for clarity:
+  // holidayPay = dailyRate * multiplier * (hours / 8)
+  // Regular: multiplier = 1.0 (100% of daily rate)
+  // Special: multiplier = 0.30 (30% of daily rate)
+  const multiplier = type === 'Regular' ? 1.0 : (type === 'Special' ? 0.30 : 0);
+  return dailyRate * multiplier * (hours / 8);
   return 0;
 };
 
@@ -30,9 +26,8 @@ export const calculateOTPay = (basicSalary, hours) => {
   if (!hours || hours <= 0) return 0;
   const dailyRate = calculateDailyRate(basicSalary);
   const hourlyRate = calculateHourlyRate(dailyRate);
-  // Standard OT Rate (usually 125% regular days, adjusting based on your sheet implying straight calc)
-  // Assuming 125% based on standard PH labor code for Regular Day OT
-  return (hourlyRate * 1.25) * hours;
+  // Use flat OT rate (no percentage multiplier): OT = hourlyRate * hours
+  return hourlyRate * hours;
 };
 
 // Revised Withholding Tax Table (Jan 1, 2023 onwards)

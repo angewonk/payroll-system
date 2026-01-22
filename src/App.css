@@ -128,7 +128,7 @@ tr:nth-child(even) {
   background-color: #fafafa; /* Very subtle stripe */
 }
 
-tr:hover {
+tr:not(.totals-row):hover {
   background-color: #f0f9ff !important; /* Light blue highlight on hover */
   transform: scale(1); /* Hack to trigger GPU rendering for smoothness */
   z-index: 5;
@@ -248,18 +248,31 @@ td input:focus, td select:focus {
 
 .payslip-box {
   border: 2px solid #000;
-  width: 800px;
+  width: calc(100% - 40px);
+  max-width: 1100px;
+  box-sizing: border-box;
   margin: 0 auto;
   font-family: Arial, sans-serif;
   color: #000;
   background: white;
-  padding: 5px;
+  padding: 10px;
 }
 /* ... (Keep the rest of the payslip CSS internal logic standard) ... */
 .payslip-header { text-align: center; position: relative; margin-bottom: 20px; }
 .company-name { font-weight: bold; font-size: 1.2rem; }
 .payslip-title { font-weight: bold; letter-spacing: 5px; margin-top: 10px; }
 .logo-area { position: absolute; right: 10px; top: 0; }
+/* Payslip logo sizing */
+.payslip-logo {
+  height: 160px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Slightly smaller for print to keep layout tight */
+@media print {
+  .payslip-logo { height: 120px; }
+}
 .employee-info { margin-bottom: 10px; }
 .info-row { display: flex; margin-bottom: 2px; font-size: 0.9rem; }
 .info-row .label { width: 100px; }
@@ -288,6 +301,13 @@ td input:focus, td select:focus {
     display: block !important;
     position: absolute;
     top: 0; left: 0; width: 100%;
+    padding: 0 8px; /* small page padding to avoid edges */
   }
   .payslip-box { width: 100%; border: 2px solid #000; }
+  /* Shrink slightly in print to avoid printer clipping */
+  .payslip-box {
+    width: 96%;
+    margin: 8px auto;
+    box-sizing: border-box;
+  }
 }

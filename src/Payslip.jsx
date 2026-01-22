@@ -1,19 +1,22 @@
 import React from 'react';
 import { formatCurrency } from './utils';
+import logo from './assets/logo.png';
 
 const Payslip = ({ employee, period }) => {
   if (!employee) return null;
 
   const { calculated, loans } = employee;
 
-  // Total Earnings = Basic + De Minimis + OT + Holiday + Non-Taxable
-  const earningsTotal = employee.basicSalary + employee.deMinimis + calculated.otPay + calculated.holidayPay + employee.nonTaxableOther;
-  
-  const totalDeductions = 
-    calculated.totalContributions + 
-    calculated.wTax + 
-    calculated.totalLoans + 
-    employee.deduction;
+  // Safe numeric helpers - state inputs may be strings, parse to numbers
+  const safeNum = (v) => parseFloat(v) || 0;
+
+  // computed values
+  // `calculated.grossPay` in App.jsx already subtracts `employee.deduction`.
+  // For display it's clearer to show "Total Pay" BEFORE deduction, then list deduction under DEDUCTIONS.
+  const grossBeforeDeduction = safeNum(calculated.grossPay) + safeNum(employee.deduction);
+  const earningsTotal = grossBeforeDeduction;
+
+  const totalDeductions = safeNum(calculated.totalContributions) + safeNum(calculated.wTax) + safeNum(calculated.totalLoans) + safeNum(employee.deduction);
 
   return (
     <div className="payslip-container">
@@ -24,8 +27,7 @@ const Payslip = ({ employee, period }) => {
           <div className="company-name">BEMTECH IT SOLUTIONS</div>
           <div className="payslip-title">P A Y S L I P</div>
           <div className="logo-area">
-            {/* Placeholder for Logo */}
-            <div style={{fontWeight:'bold', border:'1px solid #ccc', padding:'5px'}}>LOGO</div>
+            <img src={logo} alt="Company logo" className="payslip-logo" />
           </div>
         </div>
 
@@ -47,7 +49,7 @@ const Payslip = ({ employee, period }) => {
               <span>Amount</span>
             </div>
             <div className="row">
-              <span>Basic.......................... P</span>
+              <span>Basic</span>
               <span>{formatCurrency(employee.basicSalary).replace('₱', '')}</span>
             </div>
             <div className="row">
@@ -78,12 +80,12 @@ const Payslip = ({ employee, period }) => {
             <div className="spacer"></div>
 
             <div className="row total-row">
-              <span>TOTAL <span style={{float:'right'}}>P</span></span>
+              <span>TOTAL PAY</span>
               <span>{formatCurrency(earningsTotal).replace('₱', '')}</span>
             </div>
             
             <div className="row net-pay-row">
-              <span className="bold">NET PAY <span style={{float:'right'}}>P</span></span>
+              <span className="bold">NET PAY</span>
               <span className="bold">{formatCurrency(calculated.netPay).replace('₱', '')}</span>
             </div>
           </div>
@@ -94,7 +96,7 @@ const Payslip = ({ employee, period }) => {
               <span>DEDUCTIONS</span>
             </div>
             <div className="row">
-              <span>SSS ........................... P</span>
+              <span>SSS</span>
               <span>{formatCurrency(employee.sss + employee.sssMpf).replace('₱', '')}</span>
             </div>
             <div className="row">
@@ -133,15 +135,13 @@ const Payslip = ({ employee, period }) => {
             <div className="spacer"></div>
 
             <div className="row total-row">
-              <span>TOTAL <span style={{float:'right'}}>P</span></span>
+              <span>TOTAL PAY</span>
               <span>{formatCurrency(totalDeductions).replace('₱', '')}</span>
             </div>
             
             <div className="approval-section">
               <div className="approved-label">Approved :</div>
-              <div className="signature-area">
-                 <div style={{fontFamily: 'Cursive', fontSize:'1.5rem', opacity:0.5}}>Brian M.</div>
-              </div>
+                <div className="signature-area"></div>
               <div className="approver-name">Brian E. Mallari</div>
               <div className="approver-title">Business Owner</div>
             </div>
