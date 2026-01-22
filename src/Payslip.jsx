@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatCurrency } from './utils';
+import { formatCurrency, formatNumber } from './utils';
 import logo from './assets/logo.png';
 
 const Payslip = ({ employee, period }) => {
@@ -50,7 +50,7 @@ const Payslip = ({ employee, period }) => {
             </div>
             <div className="row">
               <span>Basic</span>
-              <span>{formatCurrency(employee.basicSalary).replace('₱', '')}</span>
+              <span>{formatNumber(Number(employee.basicForDecl) || 0)}</span>
             </div>
             <div className="row">
               <span>Overtime ({employee.hrsOT} hrs).....</span>
@@ -70,7 +70,7 @@ const Payslip = ({ employee, period }) => {
             </div>
             <div className="row">
               <span>13th Month/Benefits..</span>
-              <span>0.00</span>
+              <span>{formatCurrency(Number(employee.thirteenth) || 0).replace('₱', '')}</span>
             </div>
             <div className="row">
               <span>Others ({employee.nonTaxableOther > 0 ? 'Non-Tax' : ''})</span>
@@ -96,16 +96,16 @@ const Payslip = ({ employee, period }) => {
               <span>DEDUCTIONS</span>
             </div>
             <div className="row">
-              <span>SSS</span>
-              <span>{formatCurrency(employee.sss + employee.sssMpf).replace('₱', '')}</span>
+              <span>SSS / MPF</span>
+              <span>{formatCurrency(safeNum(employee.sss) + safeNum(employee.sssMpf)).replace('₱', '')}</span>
             </div>
             <div className="row">
               <span>Philhealth...................</span>
-              <span>{formatCurrency(employee.philhealth).replace('₱', '')}</span>
+              <span>{formatCurrency(safeNum(employee.philhealth)).replace('₱', '')}</span>
             </div>
             <div className="row">
               <span>Pagibig.......................</span>
-              <span>{formatCurrency(employee.pagibig).replace('₱', '')}</span>
+              <span>{formatCurrency(safeNum(employee.pagibig)).replace('₱', '')}</span>
             </div>
             <div className="row">
               <span>Tax Withheld..............</span>
@@ -113,23 +113,23 @@ const Payslip = ({ employee, period }) => {
             </div>
             <div className="row">
               <span>SSS Sal. Loan.............</span>
-              <span>{formatCurrency(loans.sssSal).replace('₱', '')}</span>
+              <span>{formatCurrency(safeNum(loans.sssSal)).replace('₱', '')}</span>
             </div>
             <div className="row">
               <span>SSS Hsng Loan...........</span>
-              <span>{formatCurrency(loans.sssHouse).replace('₱', '')}</span>
+              <span>{formatCurrency(safeNum(loans.sssHouse)).replace('₱', '')}</span>
             </div>
             <div className="row">
               <span>Pagibig Sal Loan.........</span>
-              <span>{formatCurrency(loans.pagibigSal).replace('₱', '')}</span>
+              <span>{formatCurrency(safeNum(loans.pagibigSal)).replace('₱', '')}</span>
             </div>
             <div className="row">
               <span>Others (Company).......</span>
-              <span>{formatCurrency(loans.company).replace('₱', '')}</span>
+              <span>{formatCurrency(safeNum(loans.company)).replace('₱', '')}</span>
             </div>
             <div className="row">
               <span>Absent/Tardy..............</span>
-              <span>{formatCurrency(employee.deduction).replace('₱', '')}</span>
+              <span>{formatCurrency(safeNum(employee.deduction)).replace('₱', '')}</span>
             </div>
 
             <div className="spacer"></div>

@@ -54,3 +54,10 @@ export const formatCurrency = (amount) => {
     minimumFractionDigits: 2
   }).format(amount);
 };
+
+export const formatNumber = (amount) => {
+  return new Intl.NumberFormat('en-PH', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount);
+};
