@@ -1,0 +1,293 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary: #4f46e5; /* Indigo 600 */
+  --primary-hover: #4338ca;
+  --secondary: #64748b;
+  --bg-body: #f1f5f9; /* Slate 100 */
+  --bg-card: #ffffff;
+  --text-main: #1e293b;
+  --text-light: #64748b;
+  --border: #e2e8f0;
+  --danger: #ef4444;
+  --success: #10b981;
+  --accent-row: #f8fafc;
+  --input-focus: #e0e7ff;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- MAIN CONTAINER CARD --- */
+.container {
+  max-width: 100%;
+  background: var(--bg-card);
+  border-radius: 16px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 30px;
+  margin: 0 auto;
+  animation: fadeIn 0.6s ease-out;
+}
+
+h1 {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.controls {
+  margin-bottom: 25px;
+  color: var(--text-light);
+  font-size: 0.95rem;
+  border-left: 4px solid var(--primary);
+  padding-left: 15px;
+  background: #eff6ff;
+  padding: 10px 15px;
+  border-radius: 0 8px 8px 0;
+}
+
+/* --- MODERN TABLE STYLES --- */
+.payroll-table-wrapper {
+  overflow-x: auto;
+  max-height: 80vh;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+}
+
+/* Custom Scrollbar */
+.payroll-table-wrapper::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+.payroll-table-wrapper::-webkit-scrollbar-track { background: #f1f1f1; }
+.payroll-table-wrapper::-webkit-scrollbar-thumb { 
+  background: #cbd5e1; 
+  border-radius: 5px; 
+}
+.payroll-table-wrapper::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  font-size: 13px;
+  min-width: 2200px; /* Ensures layout doesn't break */
+}
+
+/* Headers */
+thead {
+  background-color: #f8fafc;
+}
+
+th {
+  background-color: #f8fafc; /* Slate 50 */
+  color: var(--text-main);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  padding: 12px 10px;
+  border-bottom: 2px solid var(--border);
+  border-right: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(10px); /* Glass effect if BG was semi-transparent */
+}
+
+th.section-header {
+  background-color: #e2e8f0; /* Darker header for groups */
+  color: #334155;
+  text-align: center;
+}
+
+/* Rows & Cells */
+td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid #f1f5f9;
+  vertical-align: middle;
+  transition: background-color 0.2s;
+}
+
+tr {
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+tr:nth-child(even) {
+  background-color: #fafafa; /* Very subtle stripe */
+}
+
+tr:hover {
+  background-color: #f0f9ff !important; /* Light blue highlight on hover */
+  transform: scale(1); /* Hack to trigger GPU rendering for smoothness */
+  z-index: 5;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* --- INPUTS --- */
+/* Make inputs look like text until focused */
+td input, td select {
+  width: 100%;
+  border: 1px solid transparent; /* Invisible border by default */
+  border-radius: 6px;
+  padding: 6px 8px;
+  text-align: right;
+  background: transparent;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-main);
+  transition: all 0.2s ease;
+}
+
+/* Text inputs (Name) align left */
+td input[type="text"] {
+  text-align: left;
+}
+
+/* Hover state for inputs */
+td input:hover, td select:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Focus state - The "Active" look */
+td input:focus, td select:focus {
+  outline: none;
+  background-color: white;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); /* Glow effect */
+}
+
+/* Specific Cell Colors */
+.calculated-cell {
+  background-color: #f0fdf4; /* Light green bg */
+  color: #15803d; /* Green text */
+  font-weight: 600;
+  border-radius: 6px;
+  text-align: right;
+  padding: 6px 12px; /* Add padding because it's not an input */
+  display: block; /* Helps formatting */
+  margin: 2px;
+}
+
+.input-cell {
+  /* Just a marker class, default input styles handle it */
+}
+
+.negative {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* --- BUTTONS --- */
+.btn-print {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  color: white;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+}
+
+.btn-print:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 10px rgba(79, 70, 229, 0.3);
+  filter: brightness(1.1);
+}
+
+.btn-print:active {
+  transform: translateY(0);
+}
+
+/* --- TOTALS ROW --- */
+.totals-row {
+  background-color: #1e293b !important; /* Dark Slate */
+  color: white;
+  font-weight: 700;
+}
+
+.totals-row td {
+  border-color: #334155;
+  padding: 15px 12px;
+}
+
+.totals-row .calculated-cell {
+  background-color: transparent;
+  color: white;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   PAYSLIP & PRINT STYLES 
+   (Layout from previous step, kept intact but isolated)
+   ========================================= */
+.payslip-container { display: none; }
+
+.payslip-box {
+  border: 2px solid #000;
+  width: 800px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  color: #000;
+  background: white;
+  padding: 5px;
+}
+/* ... (Keep the rest of the payslip CSS internal logic standard) ... */
+.payslip-header { text-align: center; position: relative; margin-bottom: 20px; }
+.company-name { font-weight: bold; font-size: 1.2rem; }
+.payslip-title { font-weight: bold; letter-spacing: 5px; margin-top: 10px; }
+.logo-area { position: absolute; right: 10px; top: 0; }
+.employee-info { margin-bottom: 10px; }
+.info-row { display: flex; margin-bottom: 2px; font-size: 0.9rem; }
+.info-row .label { width: 100px; }
+.info-row .value { font-weight: 500; }
+.info-row .value.bold { font-weight: bold; }
+.details-grid { display: flex; border-top: 2px solid #000; border-bottom: 2px solid #000; }
+.column { flex: 1; padding: 0; display: flex; flex-direction: column; }
+.column.earnings { border-right: 1px solid #000; }
+.col-header { font-weight: bold; border-bottom: 1px solid #000; padding: 2px 5px; display: flex; justify-content: space-between; }
+.column .row { display: flex; justify-content: space-between; padding: 2px 10px; font-size: 0.9rem; }
+.spacer { flex-grow: 1; min-height: 20px; }
+.total-row { border-top: 1px solid #000; font-weight: bold; padding-top: 5px; }
+.net-pay-row { border-top: 2px solid #000; border-bottom: 1px solid #000; margin-top: 2px; padding: 10px; font-size: 1.1rem; }
+.approval-section { margin-top: 10px; padding: 10px; border-top: 1px solid #000; }
+.approver-name { font-weight: bold; text-align: center; }
+.approver-title { text-align: center; font-size: 0.8rem; }
+.signature-area { text-align: center; height: 40px; }
+.payslip-footer { padding: 20px; font-size: 0.8rem; }
+.employee-sign-line { border-top: 1px solid #000; margin-top: 40px; text-align: center; width: 100%; }
+
+/* --- PRINT MEDIA QUERY --- */
+@media print {
+  .container { display: none !important; }
+  body { background-color: white; padding: 0; margin: 0; }
+  .payslip-container {
+    display: block !important;
+    position: absolute;
+    top: 0; left: 0; width: 100%;
+  }
+  .payslip-box { width: 100%; border: 2px solid #000; }
+}
