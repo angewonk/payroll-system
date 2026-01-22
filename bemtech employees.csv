@@ -1,0 +1,13 @@
+
+id,name,position,basicSalary,hmo1,hmo2,basicForDecl,deMinimis,hrsOT,hrsHoliday,holidayType,nonTaxableOther,deduction,sss,sssMpf,sssEc,philhealth,pagibig,loans_sssSal,loans_sssHouse,loans_pagibigSal,loans_company,thirteenth,withholdingTax
+20240204,"Cerezo, Leslie Jeanne Panado",Post Install Support,40000,1600,1600,37000,3000,0,0,Regular,1500,0,1000,750,30,925,200,0,0,0,0,,
+20240207,"Villeza, Janus Ureta",Orders and Provisioning Specialist,30000,1600,1600,27000,3000,0,0,Regular,1500,0,1000,350,30,675,200,0,0,0,0,,
+20240206,"Santiago, Jay R Santos",Post Install Support,34000,1600,0,31000,3000,0,0,Regular,1500,0,1000,550,30,775,200,0,0,0,0,,
+20240205,"Dela Cruz, Abelardo Angel",Project Support Specialist,45000,1600,1600,42000,3000,0,0,Regular,1500,0,1000,750,30,1050,200,0,0,0,0,,
+20240202,"Rasalan, Kyle Roel Abrigo",Billing & Resolutions Specialist,50000,1600,0,47000,3000,0,0,Regular,1500,0,1000,750,30,1175,200,0,0,0,0,,
+20240201,"Mallari, Brian Escranda",Operations Manager,55000,1600,0,52000,3000,0,0,Regular,1500,0,3000,2250,30,1300,200,0,0,0,0,,
+20240203,"Nacar, Miguelito Abong",Senior Web Developer & Administrator,45000,1600,1600,42000,3000,0,0,Regular,1500,0,1000,750,30,1050,200,0,0,0,0,,
+20240211,"Dorado, Maria Berlyn Dela Torre",E-Customer Service Specialist,28000,1600,0,25000,3000,0,0,Regular,1500,0,1000,250,30,625,200,0,0,0,0,,
+20240210,"Panduyos, Romina Joy Dela Cruz",Systems Admin / Sales Support Specialist,45000,1600,0,42000,3000,0,0,Regular,1500,0,1000,750,30,1050,200,0,0,0,0,,
+20240212,"Valerozo, Manuel",Telemarketer/Lead Gen,30000,1600,3200,27000,3000,0,0,Regular,1500,0,1000,350,30,675,200,0,0,0,0,,
+
