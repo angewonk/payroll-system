@@ -36,7 +36,7 @@ const Payslip = ({ employee, period }) => {
           <div className="info-row"><span className="label">Period:</span> <span className="value">{period}</span></div>
           <div className="info-row"><span className="label">ID No.</span> <span className="value">{employee.id}</span></div>
           <div className="info-row"><span className="label">Name:</span> <span className="value bold">{employee.name}</span></div>
-          <div className="info-row"><span className="label">Position</span> <span className="value">Implementation Engineer</span></div>
+          <div className="info-row"><span className="label">Position</span> <span className="value">{employee.position || ''}</span></div>
         </div>
 
         {/* Earnings & Deductions Table */}

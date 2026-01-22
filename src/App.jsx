@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 import Payslip from './Payslip';
 import CustomSelect from './CustomSelect';
@@ -10,93 +10,60 @@ import {
   formatNumber
 } from './utils';
 
-// CLEAN INITIAL DATA: Fixed info stays, variable info (OT/Holiday) set to 0
-const INITIAL_DATA = [
-  {
-    id: '20240204', name: 'Cerezo, Leslie Jeanne Panado', basicSalary: 40000, 
-    hmo1: 1600, hmo2: 1600, basicForDecl: 37000, deMinimis: 3000,
-    hrsOT: 0, hrsHoliday: 0, holidayType: 'Regular', 
-    nonTaxableOther: 1500, deduction: 0,
-      sss: 1000, sssMpf: 750, sssEc: 30, philhealth: 925, pagibig: 200,
-    loans: { sssSal: 0, sssHouse: 0, pagibigSal: 0, company: 0 }
-  },
-  {
-    id: '20240207', name: 'Villeza, Janus Ureta', basicSalary: 30000, 
-    hmo1: 1600, hmo2: 1600, basicForDecl: 27000, deMinimis: 3000,
-    hrsOT: 0, hrsHoliday: 0, holidayType: 'Regular', 
-    nonTaxableOther: 1500, deduction: 0,
-      sss: 1000, sssMpf: 350, sssEc: 30, philhealth: 675, pagibig: 200,
-    loans: { sssSal: 0, sssHouse: 0, pagibigSal: 0, company: 0 }
-  },
-  {
-    id: '20240206', name: 'Santiago, Jay R Santos', basicSalary: 34000, 
-    hmo1: 1600, hmo2: 0, basicForDecl: 31000, deMinimis: 3000,
-    hrsOT: 0, hrsHoliday: 0, holidayType: 'Regular', 
-    nonTaxableOther: 1500, deduction: 0,
-      sss: 1000, sssMpf: 550, sssEc: 30, philhealth: 775, pagibig: 200,
-    loans: { sssSal: 0, sssHouse: 0, pagibigSal: 0, company: 0 }
-  },
-  {
-    id: '20240205', name: 'Dela Cruz, Abelardo Angel', basicSalary: 45000, 
-    hmo1: 1600, hmo2: 1600, basicForDecl: 42000, deMinimis: 3000,
-    hrsOT: 0, hrsHoliday: 0, holidayType: 'Regular',
-    nonTaxableOther: 1500, deduction: 0,
-      sss: 1000, sssMpf: 750, sssEc: 30, philhealth: 1050, pagibig: 200,
-    loans: { sssSal: 0, sssHouse: 0, pagibigSal: 0, company: 0 }
-  },
-  {
-    id: '20240202', name: 'Rasalan, Kyle Roel Abrigo', basicSalary: 50000, 
-    hmo1: 1600, hmo2: 0, basicForDecl: 47000, deMinimis: 3000,
-    hrsOT: 0, hrsHoliday: 0, holidayType: 'Regular',
-    nonTaxableOther: 1500, deduction: 0,
-      sss: 1000, sssMpf: 750, sssEc: 30, philhealth: 1175, pagibig: 200,
-    loans: { sssSal: 0, sssHouse: 0, pagibigSal: 0, company: 0 }
-  },
-  {
-    id: '20240201', name: 'Mallari, Brian Escranda', basicSalary: 55000, 
-    hmo1: 1600, hmo2: 0, basicForDecl: 52000, deMinimis: 3000,
-    hrsOT: 0, hrsHoliday: 0, holidayType: 'Regular',
-    nonTaxableOther: 1500, deduction: 0,
-      sss: 3000, sssMpf: 2250, sssEc: 30, philhealth: 1300, pagibig: 200,
-    loans: { sssSal: 0, sssHouse: 0, pagibigSal: 0, company: 0 }
-  },
-  {
-    id: '20240203', name: 'Nacar, Miguelito Abong', basicSalary: 45000, 
-    hmo1: 1600, hmo2: 1600, basicForDecl: 42000, deMinimis: 3000,
-    hrsOT: 0, hrsHoliday: 0, holidayType: 'Regular',
-    nonTaxableOther: 1500, deduction: 0,
-      sss: 1000, sssMpf: 750, sssEc: 30, philhealth: 1050, pagibig: 200,
-    loans: { sssSal: 0, sssHouse: 0, pagibigSal: 0, company: 0 }
-  },
-  {
-   id: '20240211', name: 'Dorado, Maria Berlyn Dela Torre', basicSalary: 28000, 
-   hmo1: 1600, hmo2: 0, basicForDecl: 25000, deMinimis: 3000,
-   hrsOT: 0, hrsHoliday: 0, holidayType: 'Regular',
-    nonTaxableOther: 1500, deduction: 0,
-      sss: 1000, sssMpf: 250, sssEc: 30, philhealth: 625, pagibig: 200,
-      loans: { sssSal: 0, sssHouse: 0, pagibigSal: 0, company: 0 }
-  },
-  {
-    id: '20240210', name: 'Panduyos, Romina Joy Dela Cruz', basicSalary: 45000, 
-    hmo1: 1600, hmo2: 0, basicForDecl: 42000, deMinimis: 3000,
-    hrsOT: 0, hrsHoliday: 0, holidayType: 'Regular',
-    nonTaxableOther: 1500, deduction: 0,
-      sss: 1000, sssMpf: 750, sssEc: 30, philhealth: 1050, pagibig: 200,
-    loans: { sssSal: 0, sssHouse: 0, pagibigSal: 0, company: 0 }
-  },
-  {
-    id: '20240212', name: 'Valerozo, Manuel', basicSalary: 30000, 
-    hmo1: 1600, hmo2: 3200, basicForDecl: 27000, deMinimis: 3000,
-    hrsOT: 0, hrsHoliday: 0, holidayType: 'Regular', 
-    nonTaxableOther: 1500, deduction: 0,
-      sss: 1000, sssMpf: 350, sssEc: 30, philhealth: 675, pagibig: 200,
-    loans: { sssSal: 0, sssHouse: 0, pagibigSal: 0, company: 0 }
-  }
-];
+// INITIAL_DATA intentionally empty to avoid committing private data.
+// Use the "Import CSV" control to load employee data at runtime.
+const INITIAL_DATA = [];
+
+// --- CSV Parsing Helper ---
+// Lightweight CSV parser that handles quoted fields and maps flattened loan columns
+const parseCSVText = (text) => {
+  const splitLine = (line) => line.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/).map(s => s.replace(/^\"|\"$/g, '').trim());
+  const rows = text.split(/\r?\n/).filter(l => l.trim() !== '');
+  if (rows.length === 0) return [];
+  const headers = splitLine(rows.shift()).map(h => h.trim());
+  return rows.map(line => {
+    const cols = splitLine(line);
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = (cols[i] !== undefined) ? cols[i] : ''; });
+
+    // Map to the shape used by the app; convert numeric fields where applicable
+    const toNum = (v) => (v === '' || v === null || v === undefined) ? '' : Number(v);
+
+    return {
+      id: obj.id || `new-${Date.now()}`,
+      name: obj.name || '',
+      position: obj.position || '',
+      basicSalary: toNum(obj.basicSalary),
+      hmo1: toNum(obj.hmo1),
+      hmo2: toNum(obj.hmo2),
+      basicForDecl: toNum(obj.basicForDecl),
+      deMinimis: toNum(obj.deMinimis),
+      hrsOT: toNum(obj.hrsOT),
+      hrsHoliday: toNum(obj.hrsHoliday),
+      holidayType: obj.holidayType || 'Regular',
+      nonTaxableOther: toNum(obj.nonTaxableOther),
+      deduction: toNum(obj.deduction),
+      thirteenth: toNum(obj.thirteenth),
+      sss: toNum(obj.sss),
+      sssMpf: toNum(obj.sssMpf),
+      sssEc: toNum(obj.sssEc),
+      philhealth: toNum(obj.philhealth),
+      pagibig: toNum(obj.pagibig),
+      withholdingTax: obj.withholdingTax !== undefined && obj.withholdingTax !== '' ? toNum(obj.withholdingTax) : '',
+      loans: {
+        sssSal: toNum(obj.loans_sssSal),
+        sssHouse: toNum(obj.loans_sssHouse),
+        pagibigSal: toNum(obj.loans_pagibigSal),
+        company: toNum(obj.loans_company)
+      }
+    };
+  });
+};
 
 // Factory to create a fresh blank employee object (avoids shared nested objects and provides unique id)
 const createBlankEmployee = () => ({
   id: `new-${Date.now()}`, name: '', basicSalary: '',
+  position: '',
   hmo1: '', hmo2: '', basicForDecl: '', deMinimis: '',
   hrsOT: '', hrsHoliday: '', holidayType: 'Regular',
   nonTaxableOther: '', deduction: '', thirteenth: '',
@@ -173,6 +140,32 @@ function App() {
   const handleAddRow = () => {
     setEmployees(prev => ([...prev, createBlankEmployee()]));
   };
+
+  // Handle CSV file selection and import
+  const handleFileUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const parsed = parseCSVText(ev.target.result || '');
+        if (parsed && parsed.length) {
+          setEmployees(parsed);
+        } else {
+          // if empty file, keep current employees
+        }
+      } catch (err) {
+        console.error('CSV parse error', err);
+        alert('Failed to parse CSV file. Check file format.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  // On every page load, ensure there's at least one editable row when employees is empty.
+  useEffect(() => {
+    setEmployees(prev => (Array.isArray(prev) && prev.length > 0) ? prev : [createBlankEmployee()]);
+  }, []);
 
   // --- REAL-TIME CALCULATION ---
   // We map over the state to produce derived data for the UI.
@@ -286,6 +279,7 @@ function App() {
         <td className="col-id"><input type="text" value={emp.id} onChange={(e) => handleInputChange(index, 'id', e.target.value)} style={{textAlign: 'center', fontWeight: 'bold'}} /></td>
         
         <td className="text-left"><input type="text" value={emp.name} onChange={(e) => handleInputChange(index, 'name', e.target.value)} /></td>
+        <td className="text-left"><input type="text" value={emp.position ?? ''} placeholder="" onChange={(e) => handleInputChange(index, 'position', e.target.value)} /></td>
         <td className="col-basic-salary"><input type="number" value={emp.basicSalary} onChange={(e) => handleInputChange(index, 'basicSalary', e.target.value)} style={{textAlign:'right'}} /></td>
         <td className="col-basic-decl"><input type="number" value={emp.basicForDecl} onChange={(e) => handleInputChange(index, 'basicForDecl', e.target.value)} style={{textAlign:'right'}} /></td>
         
@@ -342,7 +336,7 @@ function App() {
   return (
     <>
         <div className="container">
-        <h1 style={{marginBottom:'20px'}}>Payroll System</h1>
+        <h1 style={{marginBottom:'20px'}}>Payroll System <span className="byline">by angewonk</span></h1>
         
         {/* TOP CONTROLS */}
         <div style={{display:'flex', gap:'20px', alignItems:'center', marginBottom:'20px', backgroundColor:'#f8fafc', padding:'15px', borderRadius:'10px', border:'1px solid #e2e8f0'}}>
@@ -363,8 +357,14 @@ function App() {
                 />
             </div>
                     <div>
-                              <button className="btn-add" onClick={handleAddRow}>Add Row</button>
-                            </div>
+                      <button className="btn-add" onClick={handleAddRow}>Add Row</button>
+                    </div>
+                    <div className="import-control">
+                      <label>Import CSV</label>
+                      <input id="upload-csv" className="file-input" type="file" accept=".csv,text/csv" onChange={handleFileUpload} />
+                      <label htmlFor="upload-csv" className="btn-upload" role="button">Upload employee data</label>
+                      <a className="template-link" href="/initial_data_template.csv" target="_blank" rel="noreferrer">Use the template</a>
+                    </div>
             <div style={{flex:1}}>
                  <p style={{margin:0, fontSize:'0.9rem', color:'#475569'}}>
                     <strong>Instructions:</strong> Review fixed contributions. Enter <strong>OT Hours</strong> and <strong>Holiday Hours</strong> for this period.
@@ -378,6 +378,7 @@ function App() {
               <col />
               <col />
               <col />
+              <col className="col-position" />
               <col className="col-basic-salary" />
               <col className="col-basic-decl" />
               <col />
@@ -408,6 +409,7 @@ function App() {
                 <th rowSpan="2" style={{zIndex: 20}}>Action</th>
                 <th rowSpan="2" className="col-id">ID</th>
                 <th rowSpan="2" style={{minWidth:'180px'}}>Employee Name</th>
+                <th rowSpan="2" style={{minWidth:'220px'}}>Position</th>
                 <th rowSpan="2" className="col-basic-salary">Basic Salary</th>
                 <th rowSpan="2" className="col-basic-decl">Basic Salary for Declaration</th>
                 <th colSpan="2" className="section-header">Overtime</th>
@@ -447,7 +449,7 @@ function App() {
             </tbody>
             <tfoot>
               <tr className="totals-row">
-              <td colSpan="3" className="text-center">TOTALS</td> {/* action, id, name */}
+              <td colSpan="4" className="text-center">TOTALS</td> {/* action, id, name, position */}
               <td className="text-right col-basic-salary">{formatCurrency(totals.basicSalary || 0)}</td> {/* basicSalary */}
               <td className="text-right col-basic-decl">{formatCurrency(totals.basicForDecl || 0)}</td> {/* basicForDecl */}
 
