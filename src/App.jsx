@@ -180,6 +180,7 @@ function App() {
     const deMinimis = safeNum(emp.deMinimis);
     const thirteenth = safeNum(emp.thirteenth);
     const nonTaxableOther = safeNum(emp.nonTaxableOther);
+    const hmo2 = safeNum(emp.hmo2);
     const deduction = safeNum(emp.deduction);
     const basicForDecl = safeNum(emp.basicForDecl);
 
@@ -202,7 +203,8 @@ function App() {
       }
     }
 
-    const grossPay = basicForDecl + deMinimis + thirteenth + otPay + holidayPay + nonTaxableOther - deduction;
+    // Include 2nd HMO in gross pay
+    const grossPay = basicForDecl + deMinimis + thirteenth + otPay + holidayPay + nonTaxableOther + hmo2 - deduction;
     const totalContributions = sss + sssMpf + philhealth + pagibig;
     const taxableIncome = (basicForDecl + otPay + holidayPay) - totalContributions;
     // Allow manual override of withholding tax via `emp.withholdingTax`.
@@ -241,11 +243,30 @@ function App() {
     acc.basicSalary = (acc.basicSalary || 0) + safeNum(curr.basicSalary);
     acc.basicForDecl = (acc.basicForDecl || 0) + safeNum(curr.basicForDecl);
     acc.thirteenth = (acc.thirteenth || 0) + safeNum(curr.thirteenth);
+    acc.hmo2 = (acc.hmo2 || 0) + safeNum(curr.hmo2);
     acc.grossPay = (acc.grossPay || 0) + curr.calculated.grossPay;
     acc.wTax = (acc.wTax || 0) + curr.calculated.wTax;
     acc.netPay = (acc.netPay || 0) + curr.calculated.netPay;
     return acc;
   }, {});
+
+  // Debug: print totals and per-row hmo2/gross to the console for verification
+  if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+    try {
+      // eslint-disable-next-line no-console
+      console.log('Payroll totals debug:', {
+        totals: {
+          grossPay: totals.grossPay,
+          hmo2: totals.hmo2,
+          wTax: totals.wTax,
+          netPay: totals.netPay
+        },
+        rows: processedEmployees.map(r => ({ id: r.id, gross: r.calculated?.grossPay, hmo2: r.hmo2 }))
+      });
+    } catch (e) {
+      // ignore
+    }
+  }
 
   const handlePrint = (emp) => {
     setPrintEmployee(emp);
@@ -464,7 +485,7 @@ function App() {
               <td className="col-deminimis"></td> {/* De Minimis */}
               <td className="text-right col-thirteenth">{formatCurrency(totals.thirteenth || 0)}</td> {/* 13th month */}
               <td></td> {/* INTERNET / nonTaxableOther */}
-              <td className="col-hmo2"></td> {/* 2nd HMO */}
+              <td className="col-hmo2">{formatCurrency(totals.hmo2 || 0)}</td> {/* 2nd HMO */}
               <td></td> {/* Deduction */}
 
               <td className="text-right"><span className="calculated-cell">{formatCurrency(totals.grossPay)}</span></td> {/* Gross Pay (16) */}
