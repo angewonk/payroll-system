@@ -405,7 +405,7 @@ function App() {
                 <th colSpan="4" className="section-header">Contributions (Employee)</th>
                 <th rowSpan="2">Taxable Income</th>
                 <th rowSpan="2">Withholding Tax</th>
-                <th colSpan="4" className="section-header">Others</th>
+                <th colSpan="4" className="section-header">Loans</th>
                 <th rowSpan="2" className="section-header" style={{minWidth:'100px'}}>NET PAY</th>
                 </tr>
                 <tr>
@@ -427,7 +427,7 @@ function App() {
                 <th style={{top: '45px'}}>SSS Salary</th>
                 <th style={{top: '45px'}}>SSS Housing</th>
                 <th style={{top: '45px'}}>PagIBIG</th>
-                <th style={{top: '45px'}}>Company</th>
+                <th style={{top: '45px'}}>Others</th>
                 </tr>
             </thead>
             <tbody>

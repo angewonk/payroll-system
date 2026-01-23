@@ -115,7 +115,7 @@ const Payslip = ({ employee, period }) => {
               <span>{formatCurrency(calculated.wTax).replace('₱', '')}</span>
             </div>
             <div className="row subheader">
-              <span className="label bold">OTHERS</span>
+              <span className="label bold">LOANS</span>
               <span></span>
             </div>
             <div className="row">
@@ -131,7 +131,7 @@ const Payslip = ({ employee, period }) => {
               <span>{formatCurrency(safeNum(loans.pagibigSal)).replace('₱', '')}</span>
             </div>
             <div className="row">
-              <span>Others (Company).......</span>
+              <span>Others........</span>
               <span>{formatCurrency(safeNum(loans.company)).replace('₱', '')}</span>
             </div>
             <div className="row">
