@@ -9,16 +9,23 @@ export const calculateHourlyRate = (dailyRate) => {
   return dailyRate / 8;
 };
 
+// Separate helpers for holiday pay types
+export const calculateRegularHolidayPay = (basicSalary, hours) => {
+  if (!hours || hours <= 0) return 0;
+  const dailyRate = calculateDailyRate(basicSalary);
+  return dailyRate * 1.0 * (hours / 8);
+};
+
+export const calculateSpecialHolidayPay = (basicSalary, hours) => {
+  if (!hours || hours <= 0) return 0;
+  const dailyRate = calculateDailyRate(basicSalary);
+  return dailyRate * 0.3 * (hours / 8);
+};
+
 export const calculateHolidayPay = (basicSalary, type, hours) => {
   if (!hours || hours <= 0) return 0;
-  
-  const dailyRate = calculateDailyRate(basicSalary);
-  // Use daily-rate based computation for clarity:
-  // holidayPay = dailyRate * multiplier * (hours / 8)
-  // Regular: multiplier = 1.0 (100% of daily rate)
-  // Special: multiplier = 0.30 (30% of daily rate)
-  const multiplier = type === 'Regular' ? 1.0 : (type === 'Special' ? 0.30 : 0);
-  return dailyRate * multiplier * (hours / 8);
+  if (type === 'Regular') return calculateRegularHolidayPay(basicSalary, hours);
+  if (type === 'Special') return calculateSpecialHolidayPay(basicSalary, hours);
   return 0;
 };
 

@@ -11,12 +11,11 @@ const Payslip = ({ employee, period }) => {
   const safeNum = (v) => parseFloat(v) || 0;
 
   // computed values
-  // `calculated.grossPay` in App.jsx already subtracts `employee.deduction`.
-  // For display it's clearer to show "Total Pay" BEFORE deduction, then list deduction under DEDUCTIONS.
-  const grossBeforeDeduction = safeNum(calculated.grossPay) + safeNum(employee.deduction);
-  const earningsTotal = grossBeforeDeduction;
+  // `calculated.grossPay` in App.jsx already includes tax refund (employee.deduction).
+  // For display, `calculated.grossPay` is the total earnings for the period.
+  const earningsTotal = safeNum(calculated.grossPay);
 
-  const totalDeductions = safeNum(calculated.totalContributions) + safeNum(calculated.wTax) + safeNum(calculated.totalLoans) + safeNum(employee.deduction);
+  const totalDeductions = safeNum(calculated.totalContributions) + safeNum(calculated.wTax) + safeNum(calculated.totalLoans);
 
   return (
     <div className="payslip-container">
@@ -57,12 +56,16 @@ const Payslip = ({ employee, period }) => {
               <span>{employee.hrsOT > 0 ? formatCurrency(calculated.otPay).replace('₱', '') : '0.00'}</span>
             </div>
             <div className="row">
-              <span>Holiday ({employee.hrsHoliday} hrs)........</span>
-              <span>{employee.hrsHoliday > 0 ? formatCurrency(calculated.holidayPay).replace('₱', '') : '0.00'}</span>
+              <span>Regular Holiday ({employee.hrsHolidayRegular || 0} hrs)</span>
+              <span>{(employee.hrsHolidayRegular > 0) ? formatCurrency(calculated.regularHolidayPay).replace('₱', '') : '0.00'}</span>
+            </div>
+            <div className="row">
+              <span>Special Holiday ({employee.hrsHolidaySpecial || 0} hrs)</span>
+              <span>{(employee.hrsHolidaySpecial > 0) ? formatCurrency(calculated.specialHolidayPay).replace('₱', '') : '0.00'}</span>
             </div>
             <div className="row">
               <span>Tax Refund................</span>
-              <span>0.00</span>
+              <span>{formatCurrency(employee.deduction).replace('₱', '')}</span>
             </div>
             <div className="row">
               <span>De Minimis.................</span>
@@ -111,6 +114,10 @@ const Payslip = ({ employee, period }) => {
               <span>Tax Withheld..............</span>
               <span>{formatCurrency(calculated.wTax).replace('₱', '')}</span>
             </div>
+            <div className="row subheader">
+              <span className="label bold">OTHERS</span>
+              <span></span>
+            </div>
             <div className="row">
               <span>SSS Sal. Loan.............</span>
               <span>{formatCurrency(safeNum(loans.sssSal)).replace('₱', '')}</span>
@@ -129,7 +136,7 @@ const Payslip = ({ employee, period }) => {
             </div>
             <div className="row">
               <span>Absent/Tardy..............</span>
-              <span>{formatCurrency(safeNum(employee.deduction)).replace('₱', '')}</span>
+              <span>{formatCurrency(0).replace('₱', '')}</span>
             </div>
 
             <div className="spacer"></div>
