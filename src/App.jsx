@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import XLSX from 'xlsx-js-style';
+import { saveAs } from 'file-saver';
 import './App.css';
 import Payslip from './Payslip';
 import { 
@@ -10,10 +12,10 @@ import {
   formatCurrency
 } from './utils';
 
-// INITIAL_DATA intentionally empty to avoid committing private data.
+// INITIAL_DATA intentionally empty.
 const INITIAL_DATA = [];
 
-// --- CSV Parsing Helper ---
+// --- CSV Parsing Helper (Legacy) ---
 const parseCSVText = (text) => {
   const splitLine = (line) => line.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/).map(s => s.replace(/^\"|\"$/g, '').trim());
   const rows = text.split(/\r?\n/).filter(l => l.trim() !== '');
@@ -23,9 +25,7 @@ const parseCSVText = (text) => {
     const cols = splitLine(line);
     const obj = {};
     headers.forEach((h, i) => { obj[h] = (cols[i] !== undefined) ? cols[i] : ''; });
-
     const toNum = (v) => (v === '' || v === null || v === undefined) ? '' : Number(v);
-
     return {
       id: obj.id || `new-${Date.now()}`,
       name: obj.name || '',
@@ -74,6 +74,7 @@ function App() {
   const [printEmployee, setPrintEmployee] = useState(null);
   const [signatureDataUrl, setSignatureDataUrl] = useState(null);
   const [highlightedRows, setHighlightedRows] = useState([]);
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleToggleHighlight = (id) => {
     setHighlightedRows(prev => {
@@ -84,17 +85,14 @@ function App() {
 
   const handleInputChange = (index, field, value, nestedField = null) => {
     const updatedEmployees = [...employees];
-    
-    // Handle Input: If empty string, keep as empty string for UI, but treat as 0 for calc
     let val = value;
-
     if (nestedField) {
       updatedEmployees[index][nestedField][field] = val;
     } else {
       updatedEmployees[index][field] = val;
     }
     
-    // Attempt to auto-compute withholding tax for the row if user hasn't provided an override.
+    // Auto-compute withholding tax
     try {
       const safeNum = (v) => parseFloat(v) || 0;
       const emp = updatedEmployees[index];
@@ -109,7 +107,6 @@ function App() {
       const philhealth = safeNum(emp.philhealth);
       const pagibig = safeNum(emp.pagibig);
 
-      // Rates based on basicSalary
       const dailyRate = calculateDailyRate(basicSalary);
       const otPay = calculateOTPay(basicSalary, hrsOT);
       const regularHolidayPay = hrsHolidayRegular > 0 ? calculateRegularHolidayPay(basicSalary, hrsHolidayRegular) : 0;
@@ -117,18 +114,13 @@ function App() {
       const holidayPay = regularHolidayPay + specialHolidayPay;
 
       const totalContributions = sss + sssMpf + philhealth + pagibig;
-      
-      // Taxable income uses basicForDecl as base
       const taxableIncome = (basicForDecl + otPay + holidayPay) - totalContributions;
       const computedWTax = computeWithholdingTax(taxableIncome > 0 ? taxableIncome : 0);
 
-      // Only populate withholdingTax when it's empty
       if (emp.withholdingTax === undefined || emp.withholdingTax === '') {
         updatedEmployees[index].withholdingTax = Number(computedWTax.toFixed(2));
       }
-    } catch (err) {
-      // silent fallback
-    }
+    } catch (err) {}
 
     setEmployees(updatedEmployees);
   };
@@ -137,6 +129,7 @@ function App() {
     setEmployees(prev => ([...prev, createBlankEmployee()]));
   };
 
+  // --- CSV UPLOAD (Legacy) ---
   const handleFileUpload = (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -144,12 +137,9 @@ function App() {
     reader.onload = (ev) => {
       try {
         const parsed = parseCSVText(ev.target.result || '');
-        if (parsed && parsed.length) {
-          setEmployees(parsed);
-        }
+        if (parsed && parsed.length) setEmployees(parsed);
       } catch (err) {
-        console.error('CSV parse error', err);
-        alert('Failed to parse CSV file. Check file format.');
+        alert('Failed to parse CSV file.');
       }
     };
     reader.readAsText(file);
@@ -157,13 +147,10 @@ function App() {
 
   useEffect(() => {
     setEmployees(prev => (Array.isArray(prev) && prev.length > 0) ? prev : [createBlankEmployee()]);
-    // load persisted signature if present
     try {
       const stored = localStorage.getItem('payslipSignature');
       if (stored) setSignatureDataUrl(stored);
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) {}
   }, []);
 
   const handleSignatureUpload = (e) => {
@@ -174,9 +161,7 @@ function App() {
       try {
         setSignatureDataUrl(ev.target.result);
         localStorage.setItem('payslipSignature', ev.target.result);
-      } catch (err) {
-        // ignore storage errors
-      }
+      } catch (err) {}
     };
     reader.readAsDataURL(file);
   };
@@ -198,7 +183,6 @@ function App() {
     const thirteenth = safeNum(emp.thirteenth);
     const nonTaxableOther = safeNum(emp.nonTaxableOther);
     const hmo2 = safeNum(emp.hmo2);
-    // repurpose `deduction` input as Tax Refund (will be added to gross)
     const taxRefund = safeNum(emp.deduction);
     const basicForDecl = safeNum(emp.basicForDecl);
 
@@ -207,21 +191,14 @@ function App() {
     const philhealth = safeNum(emp.philhealth);
     const pagibig = safeNum(emp.pagibig);
 
-    // 1. Calculations
     const dailyRate = calculateDailyRate(basicSalary);
     const otPay = calculateOTPay(basicSalary, hrsOT);
-    
-    // Holiday pays
     const regularHolidayPay = hrsHolidayRegular > 0 ? calculateRegularHolidayPay(basicSalary, hrsHolidayRegular) : 0;
     const specialHolidayPay = hrsHolidaySpecial > 0 ? calculateSpecialHolidayPay(basicSalary, hrsHolidaySpecial) : 0;
     const holidayPay = regularHolidayPay + specialHolidayPay;
 
-    // Gross Pay includes adjustments + computed OT/Holiday and Tax Refund (added)
     const grossPay = basicForDecl + deMinimis + thirteenth + otPay + holidayPay + nonTaxableOther + hmo2 + taxRefund;
-    
     const totalContributions = sss + sssMpf + philhealth + pagibig;
-    
-    // Taxable Income
     const taxableIncome = (basicForDecl + otPay + holidayPay) - totalContributions;
     
     const overrideWTax = (emp.withholdingTax !== undefined && emp.withholdingTax !== '') ? safeNum(emp.withholdingTax) : null;
@@ -240,17 +217,8 @@ function App() {
     return {
       ...emp, 
       calculated: {
-        dailyRate,
-        otPay,
-        regularHolidayPay,
-        specialHolidayPay,
-        holidayPay,
-        grossPay,
-        totalContributions,
-        taxableIncome,
-        wTax,
-        totalLoans,
-        netPay
+        dailyRate, otPay, regularHolidayPay, specialHolidayPay, holidayPay,
+        grossPay, totalContributions, taxableIncome, wTax, totalLoans, netPay
       }
     };
   });
@@ -270,8 +238,262 @@ function App() {
 
   const handlePrint = (emp) => {
     setPrintEmployee(emp);
+    setTimeout(() => { window.print(); }, 100);
+  };
+
+  // --- IMPORT EXCEL HANDLER (FIXED) ---
+  const handleImportExcel = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        try {
+            const data = new Uint8Array(ev.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            const sheetName = workbook.SheetNames.includes("Payroll Table") ? "Payroll Table" : workbook.SheetNames[0];
+            const ws = workbook.Sheets[sheetName];
+
+            // 1. Get Date Period from Cell B1 (Row 1)
+            const periodCell = ws['B1'];
+            if(periodCell && periodCell.v) {
+                setPayslipPeriod(periodCell.v);
+            }
+
+            // 2. Read Table Data (Starting from Row 3)
+            const rawData = XLSX.utils.sheet_to_json(ws, { range: 2 });
+
+            if (!rawData || rawData.length === 0) {
+                alert("No data found in the Excel file.");
+                return;
+            }
+
+            // 3. Map Excel Columns back to App State
+            const importedEmployees = rawData
+                .filter(row => row['ID'] && row['ID'] !== 'TOTALS')
+                .map(row => {
+                    // FIXED: Properly handle '0' values. Previous code treated 0 as false and returned empty string.
+                    const toNum = (k) => (row[k] !== undefined && row[k] !== null) ? Number(row[k]) : '';
+                    
+                    return {
+                        id: row['ID'] || `new-${Date.now()}`,
+                        name: row['Name'] || '',
+                        position: row['Position'] || '',
+                        basicSalary: toNum('Basic Salary'),
+                        basicForDecl: toNum('Basic For Declaration'),
+                        
+                        hrsOT: toNum('OT Hours'),
+                        hrsHolidayRegular: toNum('Reg Hol Hrs'),
+                        hrsHolidaySpecial: toNum('Spec Hol Hrs'),
+
+                        deMinimis: toNum('De Minimis'),
+                        thirteenth: toNum('13th Month'),
+                        nonTaxableOther: toNum('INTERNET'),
+                        hmo2: toNum('2nd HMO'),
+                        deduction: toNum('Tax Refund'), 
+
+                        sss: toNum('SSS/MPF'), 
+                        sssMpf: 0, 
+                        philhealth: toNum('PhilHealth'),
+                        pagibig: toNum('Pag-IBIG'),
+                        withholdingTax: toNum('Withholding Tax'),
+
+                        loans: {
+                            sssSal: toNum('SSS Sal Loan'),
+                            sssHouse: toNum('SSS House Loan'),
+                            pagibigSal: toNum('PagIBIG Sal Loan'),
+                            company: toNum('Company Loan')
+                        }
+                    };
+                });
+
+            if (importedEmployees.length > 0) {
+                setEmployees(importedEmployees);
+                alert("Import successful!");
+            }
+
+        } catch (err) {
+            console.error("Import Error:", err);
+            alert("Failed to import Excel file. Ensure it matches the export format.");
+        }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  // --- EXPORT TO EXCEL HANDLER ---
+  const handleExportExcel = () => {
+    setIsExporting(true);
     setTimeout(() => {
-        window.print();
+      try {
+        const wb = XLSX.utils.book_new();
+        const safeNum = (v) => parseFloat(v) || 0;
+
+        // 1. Prepare Main Payroll Table
+        const tableHeaders = [
+          "ID", "Name", "Position", 
+          "Basic Salary", "Basic For Declaration", 
+          "OT Hours", "OT Amount", 
+          "Reg Hol Hrs", "Reg Hol Amt", 
+          "Spec Hol Hrs", "Spec Hol Amt", 
+          "De Minimis", "13th Month", "INTERNET", "2nd HMO", "Tax Refund",
+          "GROSS PAY", 
+          "SSS/MPF", "PhilHealth", "Pag-IBIG", "Total Contrib",
+          "Taxable Income", "Withholding Tax",
+          "SSS Sal Loan", "SSS House Loan", "PagIBIG Sal Loan", "Company Loan",
+          "NET PAY"
+        ];
+
+        const tableData = processedEmployees.map(emp => {
+          const c = emp.calculated;
+          const l = emp.loans;
+          return [
+            emp.id, emp.name, emp.position,
+            safeNum(emp.basicSalary), safeNum(emp.basicForDecl),
+            safeNum(emp.hrsOT), c.otPay,
+            safeNum(emp.hrsHolidayRegular), c.regularHolidayPay,
+            safeNum(emp.hrsHolidaySpecial), c.specialHolidayPay,
+            safeNum(emp.deMinimis), safeNum(emp.thirteenth), safeNum(emp.nonTaxableOther), safeNum(emp.hmo2), safeNum(emp.deduction),
+            c.grossPay,
+            safeNum(emp.sss) + safeNum(emp.sssMpf), safeNum(emp.philhealth), safeNum(emp.pagibig), c.totalContributions,
+            c.taxableIncome, c.wTax,
+            l.sssSal, l.sssHouse, l.pagibigSal, l.company,
+            c.netPay
+          ];
+        });
+
+        // Add Period at the very top (Row 1), Spacer (Row 2), Headers (Row 3)
+        const periodRow = ["Period:", payslipPeriod];
+        const spacerRow = []; 
+        const totalsRow = [
+          "TOTALS", "", "",
+          totals.basicSalary, totals.basicForDecl,
+          "", "", "", "", "", "",
+          "", totals.thirteenth, "", totals.hmo2, totals.taxRefund,
+          totals.grossPay,
+          "", "", "", "",
+          "", totals.wTax,
+          "", "", "", "",
+          totals.netPay
+        ];
+
+        const wsData = [
+            periodRow,
+            spacerRow,
+            tableHeaders,
+            ...tableData,
+            totalsRow
+        ];
+
+        const wsTable = XLSX.utils.aoa_to_sheet(wsData);
+
+        // --- STYLING (Headers & Colors) ---
+        wsTable['!cols'] = tableHeaders.map(() => ({ wch: 15 }));
+
+        // Header Style (Row 3 -> index 2)
+        const headerStyle = {
+            font: { bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "545B5A" } }, // Dark Gray/Green from Palette
+            alignment: { horizontal: "center", vertical: "center" },
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } }
+            }
+        };
+
+        const range = XLSX.utils.decode_range(wsTable['!ref']);
+        // Apply to Header Row (Index 2)
+        for(let C = range.s.c; C <= range.e.c; ++C) {
+            const addr = XLSX.utils.encode_cell({ r: 2, c: C });
+            if(!wsTable[addr]) continue;
+            wsTable[addr].s = headerStyle;
+        }
+
+        // Bold the "Period" label (A1) and Value (B1)
+        if(wsTable['A1']) wsTable['A1'].s = { font: { bold: true } };
+        if(wsTable['B1']) wsTable['B1'].s = { font: { bold: true } };
+
+        XLSX.utils.book_append_sheet(wb, wsTable, "Payroll Table");
+
+        // 2. Prepare Per-Employee Payslip Sheets
+        processedEmployees.forEach((emp, index) => {
+            if (!emp.name && !emp.id.toString().startsWith('new')) return; 
+            
+            const c = emp.calculated;
+            const l = emp.loans;
+            const safeN = (v) => Number((parseFloat(v) || 0).toFixed(2));
+            
+            // FIXED: Added type safety to formatC to prevent crash on 'undefined' or string values from bad import
+            const formatC = (v) => {
+               if(typeof v !== 'number' || isNaN(v)) return "0.00";
+               return v === 0 ? "0.00" : Number(v.toFixed(2));
+            };
+
+            const earnings = [
+                ["Basic", safeN(emp.basicForDecl)],
+                [`Overtime (${safeN(emp.hrsOT)} hrs)`, formatC(c.otPay)],
+                [`Regular Holiday (${safeN(emp.hrsHolidayRegular)} hrs)`, formatC(c.regularHolidayPay)],
+                [`Special Holiday (${safeN(emp.hrsHolidaySpecial)} hrs)`, formatC(c.specialHolidayPay)],
+                ["Tax Refund", formatC(safeN(emp.deduction))],
+                ["De Minimis", formatC(safeN(emp.deMinimis))],
+                ["13th Month/Benefits", formatC(safeN(emp.thirteenth))],
+                [`Others ${safeN(emp.nonTaxableOther) > 0 ? '(Non-Tax)' : ''}`, formatC(safeN(emp.nonTaxableOther))]
+            ];
+
+            const deductions = [
+                ["SSS / MPF", safeN(emp.sss) + safeN(emp.sssMpf)],
+                ["Philhealth", safeN(emp.philhealth)],
+                ["Pagibig", safeN(emp.pagibig)],
+                ["Tax Withheld", formatC(c.wTax)],
+                ["LOANS", ""],
+                ["SSS Sal. Loan", formatC(l.sssSal)],
+                ["SSS Hsng Loan", formatC(l.sssHouse)],
+                ["Pagibig Sal Loan", formatC(l.pagibigSal)],
+                ["Others (Company)", formatC(l.company)],
+                ["Absent/Tardy", "0.00"]
+            ];
+
+            const maxRows = Math.max(earnings.length, deductions.length);
+            const payslipRows = [];
+            for (let i = 0; i < maxRows; i++) {
+                const earn = earnings[i] || ["", ""];
+                const ded = deductions[i] || ["", ""];
+                payslipRows.push([earn[0], earn[1], "", ded[0], ded[1]]);
+            }
+
+            const wsDataSheet = [
+                ["BEMTECH IT SOLUTIONS"], ["P A Y S L I P"], [],
+                ["Period:", payslipPeriod], ["ID No.:", emp.id], ["Name:", emp.name], ["Position:", emp.position], [],
+                ["EARNINGS", "Amount", "", "DEDUCTIONS", "Amount"],
+                ...payslipRows, [],
+                ["TOTAL PAY", formatC(c.grossPay), "", "TOTAL DEDUCTIONS", formatC(c.totalContributions + c.wTax + c.totalLoans)],
+                ["NET PAY", formatC(c.netPay)]
+            ];
+
+            const ws = XLSX.utils.aoa_to_sheet(wsDataSheet);
+            ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }, { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } }];
+            ws['!cols'] = [{ wch: 25 }, { wch: 12 }, { wch: 5 }, { wch: 25 }, { wch: 12 }];
+
+            let sheetName = `${emp.id}-${emp.name}`.replace(/[\\/?*[\]]/g, "_").substring(0, 30);
+            if(!sheetName) sheetName = `Emp-${index}`;
+            let uniqueName = sheetName;
+            let counter = 1;
+            while(wb.Sheets[uniqueName]) { uniqueName = `${sheetName.substring(0,27)}(${counter})`; counter++; }
+            XLSX.utils.book_append_sheet(wb, ws, uniqueName);
+        });
+
+        // Use Payslip Period as Filename
+        const safeFilename = payslipPeriod.trim().replace(/[\\/:*?"<>|]/g, "_");
+        XLSX.writeFile(wb, `${safeFilename}.xlsx`);
+
+      } catch (err) {
+        console.error("Export failed", err);
+        alert("Failed to export Excel file.");
+      } finally {
+        setIsExporting(false);
+      }
     }, 100);
   };
 
@@ -374,7 +596,7 @@ function App() {
                 <button className="btn-add" onClick={handleAddRow}>Add Row</button>
             </div>
 
-            {/* Signature Uploader - Now styled identical to CSV Import */}
+            {/* Signature Uploader */}
             <div className="import-control">
                 <label>Signature (PNG)</label>
                 <input id="upload-signature" className="file-input" type="file" accept="image/*" onChange={handleSignatureUpload} />
@@ -390,18 +612,43 @@ function App() {
                 )}
             </div>
 
+            {/* Excel Controls */}
+            <div className="import-control">
+               <label>Export</label>
+               <button 
+                  className="btn-upload" 
+                  onClick={handleExportExcel} 
+                  disabled={isExporting}
+                  style={{
+                      marginTop: '4px',
+                      background: isExporting ? '#9ca3af' : 'linear-gradient(180deg, #107c41 0%, #0c5e31 100%)',
+                      color: 'white',
+                      border: 'none',
+                      width: '100%',
+                      cursor: isExporting ? 'not-allowed' : 'pointer'
+                  }}
+               >
+                  {isExporting ? 'Exporting...' : 'Export to Excel'}
+               </button>
+            </div>
+
+            <div className="import-control">
+                <label>Import Excel</label>
+                <input id="upload-excel" className="file-input" type="file" accept=".xlsx" onChange={handleImportExcel} />
+                <label htmlFor="upload-excel" className="btn-upload" role="button" style={{background: 'linear-gradient(180deg, #107c41 0%, #0c5e31 100%)'}}>Import Excel</label>
+            </div>
+
             <div className="import-control">
                 <label>Import CSV</label>
                 <input id="upload-csv" className="file-input" type="file" accept=".csv,text/csv" onChange={handleFileUpload} />
-                <label htmlFor="upload-csv" className="btn-upload" role="button">Upload employee data</label>
-                <a className="template-link" href="/initial_data_template.csv" target="_blank" rel="noreferrer">Use the template</a>
+                <label htmlFor="upload-csv" className="btn-upload" role="button">Upload CSV</label>
             </div>
-            
-            <div style={{flex:1}}>
-                 <p style={{margin:0, fontSize:'0.9rem', color:'#475569'}}>
-                    <strong>Instructions:</strong> Rates (OT/Holiday) are based on <strong>Basic Salary</strong>. Tax Base is <strong>Basic for Declaration</strong>.
-                 </p>
-            </div>
+        </div>
+        
+        <div style={{marginBottom:'20px'}}>
+            <p style={{margin:0, fontSize:'0.9rem', color:'#475569'}}>
+            <strong>Instructions:</strong> Rates (OT/Holiday) are based on <strong>Basic Salary</strong>. Tax Base is <strong>Basic for Declaration</strong>.
+            </p>
         </div>
 
         <div className="payroll-table-wrapper">

@@ -1,3 +1,22 @@
+How to Use — Import / Export
+
+Import
+	4. Verify data on-screen; the app persists the restored state so you can continue editing or re-export.
+  
+Export / Import — Quick Usage
+- Export to Excel
+	1. Set the `Payslip Period` in the control panel.
+	2. Click the green-gradient `Export to Excel` button in the header.
+	3. The app will generate a file named like `December_1_to_31_2025.xlsx` containing:
+		 - Sheet 1: `Payroll Table` (full table + footer totals, numeric cells with two decimals, styled headers).
+		 - One sheet per employee: formatted payslip matching the on-screen print view.
+	4. The file downloads automatically; open it in Excel to review or archive.
+
+- Import from Excel
+	1. Click the matching green-gradient `Import from Excel` button in the header.
+	2. Choose a workbook previously exported by the app.
+	3. The importer will detect and restore the `Payslip Period`, parse the `Payroll Table`, and map rows back into the running app (numeric conversion and empty-field handling applied).
+	4. Verify the restored data in the table and use the app as normal (edit, print, or re-export).
 # Payroll System
 
 A lightweight React-based payroll UI for entering, reviewing, and printing payslips.
@@ -10,6 +29,10 @@ Key features
 - Themed and responsive table with a styled horizontal scrollbar and per-column width control.
 - Printable payslip view per employee.
 - Front-end-only peso symbol and number formatting using Philippine locale.
+
+- Advanced Excel Export/Import:
+	- Export the entire payroll to a styled `.xlsx` workbook named from the `Payslip Period` (e.g., `December_1_to_31_2025.xlsx`). The workbook includes a first sheet `Payroll Table` with the full summary table (styled headers: dark green background + bold white text) and a separate, formatted payslip sheet for each employee (sheet names like `new-1234 - Ronan Soriano`). Uses `xlsx-js-style` to preserve cell styling and `file-saver` to trigger downloads.
+	- Import a previously exported workbook to restore app state: the importer detects the `Payslip Period` from the workbook header, parses the `Payroll Table`, maps rows back into the application state, and safely handles number formatting and empty fields.
 
 Getting started
 1. Install dependencies and run locally:
