@@ -2,7 +2,7 @@ import React from 'react';
 import { formatCurrency, formatNumber } from './utils';
 import logo from './assets/logo.png';
 
-const Payslip = ({ employee, period }) => {
+const Payslip = ({ employee, period, signature }) => {
   if (!employee) return null;
 
   const { calculated, loans } = employee;
@@ -148,7 +148,13 @@ const Payslip = ({ employee, period }) => {
             
             <div className="approval-section">
               <div className="approved-label">Approved :</div>
-                <div className="signature-area"></div>
+                <div className="signature-area">
+                  {signature ? (
+                    <img src={signature} alt="Signature" style={{maxWidth:'220px', maxHeight:'80px', objectFit:'contain'}} />
+                  ) : (
+                    <div style={{height:'60px'}}></div>
+                  )}
+                </div>
               <div className="approver-name">Brian E. Mallari</div>
               <div className="approver-title">Business Owner</div>
             </div>

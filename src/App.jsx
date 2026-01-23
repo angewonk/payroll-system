@@ -72,6 +72,7 @@ function App() {
   const [employees, setEmployees] = useState(INITIAL_DATA);
   const [payslipPeriod, setPayslipPeriod] = useState('December 1 to 31, 2025');
   const [printEmployee, setPrintEmployee] = useState(null);
+  const [signatureDataUrl, setSignatureDataUrl] = useState(null);
   const [highlightedRows, setHighlightedRows] = useState([]);
 
   const handleToggleHighlight = (id) => {
@@ -98,7 +99,7 @@ function App() {
       const safeNum = (v) => parseFloat(v) || 0;
       const emp = updatedEmployees[index];
       
-      const basicSalary = safeNum(emp.basicSalary); // UPDATED: Get Real Basic Salary
+      const basicSalary = safeNum(emp.basicSalary);
       const basicForDecl = safeNum(emp.basicForDecl);
       const hrsOT = safeNum(emp.hrsOT);
       const hrsHolidayRegular = safeNum(emp.hrsHolidayRegular);
@@ -108,7 +109,7 @@ function App() {
       const philhealth = safeNum(emp.philhealth);
       const pagibig = safeNum(emp.pagibig);
 
-      // UPDATED: Calculate Rates based on basicSalary (not basicForDecl)
+      // Rates based on basicSalary
       const dailyRate = calculateDailyRate(basicSalary);
       const otPay = calculateOTPay(basicSalary, hrsOT);
       const regularHolidayPay = hrsHolidayRegular > 0 ? calculateRegularHolidayPay(basicSalary, hrsHolidayRegular) : 0;
@@ -117,7 +118,7 @@ function App() {
 
       const totalContributions = sss + sssMpf + philhealth + pagibig;
       
-      // Note: Taxable income still uses basicForDecl as the base component, plus the NEW OT/Holiday amounts
+      // Taxable income uses basicForDecl as base
       const taxableIncome = (basicForDecl + otPay + holidayPay) - totalContributions;
       const computedWTax = computeWithholdingTax(taxableIncome > 0 ? taxableIncome : 0);
 
@@ -156,7 +157,34 @@ function App() {
 
   useEffect(() => {
     setEmployees(prev => (Array.isArray(prev) && prev.length > 0) ? prev : [createBlankEmployee()]);
+    // load persisted signature if present
+    try {
+      const stored = localStorage.getItem('payslipSignature');
+      if (stored) setSignatureDataUrl(stored);
+    } catch (e) {
+      // ignore
+    }
   }, []);
+
+  const handleSignatureUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        setSignatureDataUrl(ev.target.result);
+        localStorage.setItem('payslipSignature', ev.target.result);
+      } catch (err) {
+        // ignore storage errors
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleClearSignature = () => {
+    setSignatureDataUrl(null);
+    try { localStorage.removeItem('payslipSignature'); } catch (e) {}
+  };
 
   // --- REAL-TIME CALCULATION ---
   const processedEmployees = employees.map(emp => {
@@ -179,11 +207,11 @@ function App() {
     const philhealth = safeNum(emp.philhealth);
     const pagibig = safeNum(emp.pagibig);
 
-    // 1. Calculations - UPDATED: Use `basicSalary` (Real) for Rates
+    // 1. Calculations
     const dailyRate = calculateDailyRate(basicSalary);
     const otPay = calculateOTPay(basicSalary, hrsOT);
     
-    // UPDATED: Calculate separate holiday pays using `basicSalary`
+    // Holiday pays
     const regularHolidayPay = hrsHolidayRegular > 0 ? calculateRegularHolidayPay(basicSalary, hrsHolidayRegular) : 0;
     const specialHolidayPay = hrsHolidaySpecial > 0 ? calculateSpecialHolidayPay(basicSalary, hrsHolidaySpecial) : 0;
     const holidayPay = regularHolidayPay + specialHolidayPay;
@@ -193,7 +221,7 @@ function App() {
     
     const totalContributions = sss + sssMpf + philhealth + pagibig;
     
-    // Taxable Income: Basic Declared + (OT & Holiday based on Real Basic) - Contributions
+    // Taxable Income
     const taxableIncome = (basicForDecl + otPay + holidayPay) - totalContributions;
     
     const overrideWTax = (emp.withholdingTax !== undefined && emp.withholdingTax !== '') ? safeNum(emp.withholdingTax) : null;
@@ -345,12 +373,30 @@ function App() {
             <div>
                 <button className="btn-add" onClick={handleAddRow}>Add Row</button>
             </div>
+
+            {/* Signature Uploader - Now styled identical to CSV Import */}
+            <div className="import-control">
+                <label>Signature (PNG)</label>
+                <input id="upload-signature" className="file-input" type="file" accept="image/*" onChange={handleSignatureUpload} />
+                <label htmlFor="upload-signature" className="btn-upload" role="button">Upload Signature</label>
+                {signatureDataUrl && (
+                    <span 
+                      className="template-link" 
+                      onClick={handleClearSignature} 
+                      style={{cursor: 'pointer', color: '#ef4444'}}
+                    >
+                        Clear Signature
+                    </span>
+                )}
+            </div>
+
             <div className="import-control">
                 <label>Import CSV</label>
                 <input id="upload-csv" className="file-input" type="file" accept=".csv,text/csv" onChange={handleFileUpload} />
                 <label htmlFor="upload-csv" className="btn-upload" role="button">Upload employee data</label>
                 <a className="template-link" href="/initial_data_template.csv" target="_blank" rel="noreferrer">Use the template</a>
             </div>
+            
             <div style={{flex:1}}>
                  <p style={{margin:0, fontSize:'0.9rem', color:'#475569'}}>
                     <strong>Instructions:</strong> Rates (OT/Holiday) are based on <strong>Basic Salary</strong>. Tax Base is <strong>Basic for Declaration</strong>.
@@ -455,7 +501,7 @@ function App() {
         </div>
         </div>
 
-        {printEmployee && <Payslip employee={printEmployee} period={payslipPeriod} />}
+        {printEmployee && <Payslip employee={printEmployee} period={payslipPeriod} signature={signatureDataUrl} />}
     </>
   )
 }
