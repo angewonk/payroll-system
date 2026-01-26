@@ -156,8 +156,13 @@ h1 {
 .import-control .file-input { display: none; }
 
 .btn-upload {
-  display: inline-block;
-  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 140px;
+  height: 40px;
+  padding: 8px 14px;
   border-radius: 8px;
   background: linear-gradient(180deg, var(--primary) 0%, #3f4948 100%);
   color: var(--palette-2);
@@ -167,6 +172,7 @@ h1 {
   margin-top: 4px;
   text-decoration: none;
   box-shadow: 0 6px 14px rgba(84,91,90,0.08);
+  font-size: 0.95rem;
 }
 .btn-upload:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(84,91,90,0.12); }
 .btn-upload:active { transform: translateY(0); }
@@ -454,7 +460,13 @@ td input:focus, td select:focus {
 
 /* Add Row button (primary accent) */
 .btn-add {
-  padding: 10px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 140px;
+  height: 40px;
+  padding: 8px 14px;
   border-radius: 8px;
   border: none;
   background: linear-gradient(180deg, var(--palette-5) 0%, #3f4948 100%);
@@ -462,9 +474,18 @@ td input:focus, td select:focus {
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 6px 14px rgba(84,91,90,0.08);
+  font-size: 0.95rem;
 }
 .btn-add:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(84,91,90,0.12); }
 .btn-add:active { transform: translateY(0); }
+
+/* Ensure upload/import and add buttons are consistent size and centered */
+.import-control .btn-upload,
+.import-control .btn-add {
+  width: 160px;
+  align-self: center;
+  white-space: nowrap;
+}
 
 /* Row highlight style */
 tr.row-highlight {

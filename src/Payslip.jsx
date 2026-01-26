@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatCurrency, formatNumber } from './utils';
 import logo from './assets/logo.png';
 
-const Payslip = ({ employee, period, signature, businessOwner: initialOwner = 'Brian E. Mallari' }) => {
+const Payslip = ({ employee, period, signature, businessOwner: initialOwner = '', showLogo = true }) => {
   if (!employee) return null;
 
   const { calculated, loans } = employee;
 
   // Business owner (approver) editable input
   const [businessOwner, setBusinessOwner] = useState(initialOwner);
+
+  useEffect(() => {
+    setBusinessOwner(initialOwner);
+  }, [initialOwner]);
 
   // Safe numeric helpers - state inputs may be strings, parse to numbers
   const safeNum = (v) => parseFloat(v) || 0;
@@ -29,7 +33,7 @@ const Payslip = ({ employee, period, signature, businessOwner: initialOwner = 'B
           <div className="company-name">BEMTECH IT SOLUTIONS</div>
           <div className="payslip-title">P A Y S L I P</div>
           <div className="logo-area">
-            <img src={logo} alt="Company logo" className="payslip-logo" />
+            {showLogo && <img src={logo} alt="Company logo" className="payslip-logo" />}
           </div>
         </div>
 
@@ -38,13 +42,6 @@ const Payslip = ({ employee, period, signature, businessOwner: initialOwner = 'B
           <div className="info-row">
             <span className="label">Period:</span>
             <span className="value">{period}</span>
-            <input
-              className="owner-input"
-              value={businessOwner}
-              onChange={(e) => setBusinessOwner(e.target.value)}
-              placeholder="Business owner"
-              aria-label="Business owner name"
-            />
           </div>
           <div className="info-row"><span className="label">ID No.</span> <span className="value">{employee.id}</span></div>
           <div className="info-row"><span className="label">Name:</span> <span className="value bold">{employee.name}</span></div>

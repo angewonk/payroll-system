@@ -70,9 +70,11 @@ const createBlankEmployee = () => ({
 
 function App() {
   const [employees, setEmployees] = useState(INITIAL_DATA);
-  const [payslipPeriod, setPayslipPeriod] = useState('December 1 to 31, 2025');
+  const [payslipPeriod, setPayslipPeriod] = useState(null);
   const [printEmployee, setPrintEmployee] = useState(null);
   const [signatureDataUrl, setSignatureDataUrl] = useState(null);
+  const [businessOwner, setBusinessOwner] = useState('');
+  const [showLogo, setShowLogo] = useState(true);
   const [highlightedRows, setHighlightedRows] = useState([]);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -147,9 +149,19 @@ function App() {
 
   useEffect(() => {
     setEmployees(prev => (Array.isArray(prev) && prev.length > 0) ? prev : [createBlankEmployee()]);
+
+    // First-run initialization: on first load, keep logo, signature and owner blank.
     try {
-      const stored = localStorage.getItem('payslipSignature');
-      if (stored) setSignatureDataUrl(stored);
+      const initialized = localStorage.getItem('payslip_initialized');
+      if (!initialized) {
+        setBusinessOwner('');
+        setSignatureDataUrl(null);
+        setShowLogo(false);
+        localStorage.setItem('payslip_initialized', '1');
+      } else {
+        const stored = localStorage.getItem('payslipSignature');
+        if (stored) setSignatureDataUrl(stored);
+      }
     } catch (e) {}
   }, []);
 
@@ -577,7 +589,7 @@ function App() {
         
         <div style={{display:'flex', gap:'20px', alignItems:'center', marginBottom:'20px', backgroundColor:'#f8fafc', padding:'15px', borderRadius:'10px', border:'1px solid #e2e8f0'}}>
             <div>
-                <label style={{display:'block', fontSize:'0.85rem', fontWeight:'600', color:'#64748b', marginBottom:'5px'}}>PAYSLIP PERIOD:</label>
+                <label style={{display:'block', fontSize:'0.85rem', fontWeight:'600', color:'#64748b', marginBottom:'5px'}}>Payslip Period:</label>
                 <input 
                     type="text" 
                     value={payslipPeriod} 
@@ -592,8 +604,26 @@ function App() {
                     }}
                 />
             </div>
-            <div>
-                <button className="btn-add" onClick={handleAddRow}>Add Row</button>
+            <div className="import-control">
+              <label style={{display:'block', fontSize:'0.85rem', fontWeight:'600', color:'#64748b', marginBottom:'5px'}}>Business Owner:</label>
+              <input 
+                type="text" 
+                value={businessOwner} 
+                onChange={(e) => setBusinessOwner(e.target.value)} 
+                style={{
+                  padding:'8px 12px', 
+                  borderRadius:'6px', 
+                  border:'1px solid #cbd5e1', 
+                  fontSize:'1rem', 
+                  width:'220px',
+                  fontWeight: '500'
+                }}
+              />
+            </div>
+
+            <div className="import-control">
+              <label>&nbsp;</label>
+              <button className="btn-add" onClick={handleAddRow} style={{marginTop: '4px'}}>Add Row</button>
             </div>
 
             {/* Signature Uploader */}
@@ -624,7 +654,6 @@ function App() {
                       background: isExporting ? '#9ca3af' : 'linear-gradient(180deg, #107c41 0%, #0c5e31 100%)',
                       color: 'white',
                       border: 'none',
-                      width: '100%',
                       cursor: isExporting ? 'not-allowed' : 'pointer'
                   }}
                >
@@ -748,7 +777,7 @@ function App() {
         </div>
         </div>
 
-        {printEmployee && <Payslip employee={printEmployee} period={payslipPeriod} signature={signatureDataUrl} />}
+        {printEmployee && <Payslip employee={printEmployee} period={payslipPeriod} signature={signatureDataUrl} businessOwner={businessOwner} showLogo={showLogo} />}
     </>
   )
 }
