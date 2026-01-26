@@ -537,6 +537,18 @@ thead tr:nth-child(2) th { top: 48px !important; }
 .info-row .label { width: 100px; }
 .info-row .value { font-weight: 500; }
 .info-row .value.bold { font-weight: bold; }
+.info-row .owner-input {
+  margin-left: auto;
+  width: 240px;
+  padding: 6px 8px;
+  font-size: 0.95rem;
+  border: 1px solid #222;
+  border-radius: 4px;
+}
+
+@media print {
+  .info-row .owner-input { border: none; background: transparent; }
+}
 .details-grid { display: flex; border-top: 2px solid #000; border-bottom: 2px solid #000; }
 .column { flex: 1; padding: 0; display: flex; flex-direction: column; }
 .column.earnings { border-right: 1px solid #000; }

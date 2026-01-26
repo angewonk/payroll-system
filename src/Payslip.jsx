@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { formatCurrency, formatNumber } from './utils';
 import logo from './assets/logo.png';
 
-const Payslip = ({ employee, period, signature }) => {
+const Payslip = ({ employee, period, signature, businessOwner: initialOwner = 'Brian E. Mallari' }) => {
   if (!employee) return null;
 
   const { calculated, loans } = employee;
+
+  // Business owner (approver) editable input
+  const [businessOwner, setBusinessOwner] = useState(initialOwner);
 
   // Safe numeric helpers - state inputs may be strings, parse to numbers
   const safeNum = (v) => parseFloat(v) || 0;
@@ -32,7 +35,17 @@ const Payslip = ({ employee, period, signature }) => {
 
         {/* Employee Details */}
         <div className="employee-info">
-          <div className="info-row"><span className="label">Period:</span> <span className="value">{period}</span></div>
+          <div className="info-row">
+            <span className="label">Period:</span>
+            <span className="value">{period}</span>
+            <input
+              className="owner-input"
+              value={businessOwner}
+              onChange={(e) => setBusinessOwner(e.target.value)}
+              placeholder="Business owner"
+              aria-label="Business owner name"
+            />
+          </div>
           <div className="info-row"><span className="label">ID No.</span> <span className="value">{employee.id}</span></div>
           <div className="info-row"><span className="label">Name:</span> <span className="value bold">{employee.name}</span></div>
           <div className="info-row"><span className="label">Position</span> <span className="value">{employee.position || ''}</span></div>
@@ -155,7 +168,7 @@ const Payslip = ({ employee, period, signature }) => {
                     <div style={{height:'60px'}}></div>
                   )}
                 </div>
-              <div className="approver-name">Brian E. Mallari</div>
+              <div className="approver-name">{businessOwner}</div>
               <div className="approver-title">Business Owner</div>
             </div>
           </div>
